@@ -1,0 +1,69 @@
+# TestAgent 生产环境依赖
+
+# Web框架
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# 数据验证和序列化
+pydantic>=2.5.0
+pydantic-settings>=2.0.0
+
+# 异步支持
+asyncio-mqtt>=0.13.0
+aiofiles>=23.0.0
+aiohttp>=3.9.0
+
+# LLM集成
+litellm>=1.0.0
+openai>=1.0.0
+anthropic>=0.7.0
+
+# 向量数据库
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+
+# 文档处理
+pypdf2>=3.0.0
+python-docx>=0.8.11
+openpyxl>=3.1.0
+python-multipart>=0.0.6
+
+# 数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 缓存
+redis>=5.0.0
+hiredis>=2.2.0
+
+# 配置管理
+python-dotenv>=1.0.0
+PyYAML>=6.0.0
+
+# 日志
+loguru>=0.7.0
+
+# 监控
+psutil>=5.9.0
+prometheus-client>=0.19.0
+
+# 工具
+requests>=2.31.0
+httpx>=0.25.0
+click>=8.1.0
+
+# 安全
+cryptography>=41.0.0
+passlib>=1.7.4
+
+# 时间处理
+python-dateutil>=2.8.0
+
+# JSON处理
+orjson>=3.9.0
+
+# 网络
+websockets>=12.0
+
+# 系统工具
+pathlib2>=2.3.7

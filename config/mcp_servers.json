@@ -1,0 +1,36 @@
+ {
+  "mcpServers": {
+    "stdio-server": {
+      "connection_type": "stdio",
+      "command": "uvx",
+      "args": ["example-mcp-server"],
+      "env": {
+        "LOG_LEVEL": "INFO"
+      },
+      "enabled_tools": [],
+      "add_to_agents": ["researcher"],
+      "disabled": true,
+      "timeout": 30,
+      "retry_count": 3,
+      "auto_restart": true
+    },
+    "sse-server": {
+      "connection_type": "sse",
+      "url": "https://api.example.com/mcp/sse",
+      "headers": {
+        "Authorization": "Bearer your-token-here",
+        "Content-Type": "application/json"
+      },
+      "enabled_tools": [],
+      "add_to_agents": ["researcher"],
+      "disabled": true,
+      "timeout": 30,
+      "retry_count": 3,
+      "auto_restart": true
+    }
+  },
+  "global_timeout": 60,
+  "max_concurrent_connections": 10,
+  "enable_logging": true,
+  "log_level": "INFO"
+}

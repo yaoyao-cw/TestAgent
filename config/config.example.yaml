@@ -1,0 +1,88 @@
+# TestAgent 配置文件示例
+# 复制此文件为 config.yaml 并根据需要修改配置
+
+# 基本配置
+debug: false
+testing: false
+environment: "development"  # development, testing, production
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "./logs/testagent.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  rotation: "1 day"  # 日志轮转: "1 day", "10 MB", etc.
+  retention: "30 days"
+  compression: "zip"
+
+# LLM配置
+llm:
+  provider: "openai"  # openai, anthropic, azure, local
+  default_model: "gpt-3.5-turbo"
+  temperature: 0.7
+  max_tokens: 2000
+  timeout: 60
+  cache_enabled: true
+  cache_ttl: 3600
+  
+  # OpenAI配置
+  openai_api_key: null  # 从环境变量 OPENAI_API_KEY 获取
+  openai_organization: null
+  
+  # Anthropic配置
+  anthropic_api_key: null  # 从环境变量 ANTHROPIC_API_KEY 获取
+  
+  # Azure OpenAI配置
+  azure_openai_api_key: null
+  azure_openai_endpoint: null
+  azure_openai_api_version: "2023-12-01-preview"
+
+# 向量数据库配置
+vector_db:
+  type: "chroma"  # chroma, faiss, milvus, pinecone, qdrant
+  path: "./data/vectordb"
+  embedding_model: "text-embedding-ada-002"
+  embedding_provider: "openai"  # openai, huggingface, cohere, local
+  collection_name: "testagent_knowledge"
+  distance_metric: "cosine"  # cosine, euclidean, dot_product
+
+# MCP工具配置
+mcp:
+  servers_config: "./config/mcp_servers.json"
+  timeout: 30
+  max_retries: 3
+  auto_discovery: true
+
+# 人机协作配置
+collaboration:
+  auto_accept_mode: "conditional"  # always, never, conditional
+  review_timeout: 3600  # 审查超时时间（秒）
+  confidence_threshold: 0.8  # 自动接受的置信度阈值
+
+# API服务器配置
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  reload: false
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
+  allowed_hosts:
+    - "localhost"
+    - "127.0.0.1"
+  api_key_required: false
+  api_keys: []
+  rate_limit_enabled: true
+  rate_limit_calls_per_minute: 60
+
+# 缓存配置
+cache:
+  enabled: true
+  redis_url: null  # 如果设置，使用Redis缓存，否则使用本地缓存
+  ttl: 3600  # 默认缓存有效期（秒）
+  dir: "./data/cache"  # 本地缓存目录
+
+# 性能监控
+enable_metrics: true
+metrics_port: 9090

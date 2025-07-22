@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TestAgent 监控仪表板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+        
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-healthy { background-color: #27ae60; }
+        .status-warning { background-color: #f39c12; }
+        .status-error { background-color: #e74c3c; }
+        .status-unknown { background-color: #95a5a6; }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            color: #3498db;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transition: width 0.3s ease;
+        }
+        
+        .error-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .error-item {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background-color: #fdf2f2;
+            border-left: 4px solid #e74c3c;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+        
+        .timestamp {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            text-align: right;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>TestAgent 监控仪表板</h1>
+    </div>
+    
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button class="refresh-btn" onclick="refreshData()" id="refreshBtn">
+                刷新数据
+            </button>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- 健康状态卡片 -->
+            <div class="card">
+                <h2>系统健康状态</h2>
+                <div id="healthStatus" class="loading">加载中...</div>
+            </div>
+            
+            <!-- 系统资源卡片 -->
+            <div class="card">
+                <h2>系统资源</h2>
+                <div id="systemStats" class="loading">加载中...</div>
+            </div>
+            
+            <!-- 性能统计卡片 -->
+            <div class="card">
+                <h2>性能统计</h2>
+                <div id="performanceStats" class="loading">加载中...</div>
+            </div>
+            
+            <!-- 错误统计卡片 -->
+            <div class="card">
+                <h2>错误统计</h2>
+                <div id="errorStats" class="loading">加载中...</div>
+            </div>
+        </div>
+        
+        <div class="timestamp" id="lastUpdate"></div>
+    </div>
+
+    <script>
+        let refreshInterval;
+        
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(`/api/v1/monitoring/${endpoint}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                return null;
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch (status) {
+                case 'healthy': return 'status-healthy';
+                case 'warning': return 'status-warning';
+                case 'error':
+                case 'unhealthy': return 'status-error';
+                default: return 'status-unknown';
+            }
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function formatDuration(seconds) {
+            if (seconds < 1) return (seconds * 1000).toFixed(0) + 'ms';
+            if (seconds < 60) return seconds.toFixed(2) + 's';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = (seconds % 60).toFixed(0);
+            return `${minutes}m ${remainingSeconds}s`;
+        }
+        
+        async function updateHealthStatus() {
+            const data = await fetchData('health');
+            const container = document.getElementById('healthStatus');
+            
+            if (!data) {
+                container.innerHTML = '<div class="error-item">无法获取健康状态数据</div>';
+                return;
+            }
+            
+            let html = `
+                <div class="metric-item">
+                    <span class="metric-label">
+                        <span class="status-indicator ${getStatusClass(data.status)}"></span>
+                        整体状态
+                    </span>
+                    <span class="metric-value">${data.status}</span>
+                </div>
+            `;
+            
+            if (data.checks) {
+                Object.entries(data.checks).forEach(([name, check]) => {
+                    html += `
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <span class="status-indicator ${getStatusClass(check.status)}"></span>
+                                ${name}
+                            </span>
+                            <span class="metric-value">${check.status}</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        async function updateSystemStats() {
+            const data = await fetchData('system');
+            const container = document.getElementById('systemStats');
+            
+            if (!data) {
+                container.innerHTML = '<div class="error-item">无法获取系统统计数据</div>';
+                return;
+            }
+            
+            const html = `
+                <div class="metric-item">
+                    <span class="metric-label">CPU 使用率</span>
+                    <span class="metric-value">${data.cpu_usage.toFixed(1)}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${data.cpu_usage}%"></div>
+                </div>
+                
+                <div class="metric-item">
+                    <span class="metric-label">内存使用率</span>
+                    <span class="metric-value">${data.memory_usage.toFixed(1)}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${data.memory_usage}%"></div>
+                </div>
+                
+                <div class="metric-item">
+                    <span class="metric-label">磁盘使用率</span>
+                    <span class="metric-value">${data.disk_usage.toFixed(1)}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${data.disk_usage}%"></div>
+                </div>
+                
+                <div class="metric-item">
+                    <span class="metric-label">进程内存</span>
+                    <span class="metric-value">${formatBytes(data.process_stats.memory_rss)}</span>
+                </div>
+                
+                <div class="metric-item">
+                    <span class="metric-label">线程数</span>
+                    <span class="metric-value">${data.process_stats.num_threads}</span>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        async function updatePerformanceStats() {
+            const data = await fetchData('performance');
+            const container = document.getElementById('performanceStats');
+            
+            if (!data || !data.stats || Object.keys(data.stats).length === 0) {
+                container.innerHTML = '<div class="metric-item">暂无性能数据</div>';
+                return;
+            }
+            
+            let html = '';
+            Object.entries(data.stats).slice(0, 5).forEach(([operation, stats]) => {
+                html += `
+                    <div class="metric-item">
+                        <span class="metric-label">${operation}</span>
+                        <span class="metric-value">${stats.total_calls} 次调用</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">平均耗时</span>
+                        <span class="metric-value">${formatDuration(stats.avg_time)}</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">成功率</span>
+                        <span class="metric-value">${stats.success_rate.toFixed(1)}%</span>
+                    </div>
+                    <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid #ecf0f1;">
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        async function updateErrorStats() {
+            const data = await fetchData('errors');
+            const container = document.getElementById('errorStats');
+            
+            if (!data) {
+                container.innerHTML = '<div class="error-item">无法获取错误统计数据</div>';
+                return;
+            }
+            
+            let html = `
+                <div class="metric-item">
+                    <span class="metric-label">总错误数</span>
+                    <span class="metric-value">${data.total_errors}</span>
+                </div>
+            `;
+            
+            if (data.error_count && Object.keys(data.error_count).length > 0) {
+                html += '<div style="margin-top: 1rem;"><strong>错误类型:</strong></div>';
+                Object.entries(data.error_count).forEach(([errorType, count]) => {
+                    html += `
+                        <div class="metric-item">
+                            <span class="metric-label">${errorType}</span>
+                            <span class="metric-value">${count}</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (data.circuit_breakers && Object.keys(data.circuit_breakers).length > 0) {
+                html += '<div style="margin-top: 1rem;"><strong>熔断器状态:</strong></div>';
+                Object.entries(data.circuit_breakers).forEach(([service, breaker]) => {
+                    const statusClass = breaker.state === 'open' ? 'status-error' : 'status-healthy';
+                    html += `
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <span class="status-indicator ${statusClass}"></span>
+                                ${service}
+                            </span>
+                            <span class="metric-value">${breaker.state}</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        async function refreshData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = '刷新中...';
+            
+            try {
+                await Promise.all([
+                    updateHealthStatus(),
+                    updateSystemStats(),
+                    updatePerformanceStats(),
+                    updateErrorStats()
+                ]);
+                
+                document.getElementById('lastUpdate').textContent = 
+                    `最后更新: ${new Date().toLocaleString()}`;
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+            } finally {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = '刷新数据';
+            }
+        }
+        
+        function startAutoRefresh() {
+            refreshInterval = setInterval(refreshData, 30000); // 每30秒刷新一次
+        }
+        
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+            startAutoRefresh();
+        });
+        
+        // 页面隐藏时停止自动刷新，显示时恢复
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        });
+    </script>
+</body>
+</html>
