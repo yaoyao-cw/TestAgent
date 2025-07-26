@@ -64,6 +64,50 @@ from .recovery import (
     initialize_recovery_system
 )
 
+from .workspace import (
+    TaskFileSystemManager,
+    FileNamingManager,
+    workspace_manager
+)
+
+from .base_agent import (
+    BaseAgent,
+    SimpleAgent,
+    ReActAgent,
+    AgentInput,
+    AgentOutput,
+    AgentPhase
+)
+
+from .agent_router import (
+    AgentRouter,
+    RoutingRule,
+    Message,
+    RoutingStrategy,
+    ConditionalRouter
+)
+
+from .data_models import (
+    ApplicationConfig,
+    SystemInfo,
+    PathConfig,
+    EnvironmentConfig,
+    DatabaseConfig,
+    LLMConfig,
+    APIResponse,
+    HealthCheckResponse,
+    get_global_config,
+    set_global_config
+)
+
+from .dependencies import (
+    VirtualEnvironmentManager,
+    DependencyChecker,
+    ProjectInitializer,
+    check_system_requirements,
+    initialize_testagent_project
+)
+
 __all__ = [
     # Exceptions
     "TestAgentException",
@@ -118,7 +162,44 @@ __all__ = [
     "RecoveryManager",
     "get_recovery_manager",
     "with_recovery",
-    "initialize_recovery_system"
+    "initialize_recovery_system",
+    
+    # 工作空间管理
+    "TaskFileSystemManager",
+    "FileNamingManager", 
+    "workspace_manager",
+    
+    # 智能体编排
+    "BaseAgent",
+    "SimpleAgent",
+    "ReActAgent",
+    "AgentInput",
+    "AgentOutput",
+    "AgentPhase",
+    "AgentRouter",
+    "RoutingRule",
+    "Message",
+    "RoutingStrategy",
+    "ConditionalRouter",
+    
+    # 数据模型和配置
+    "ApplicationConfig",
+    "SystemInfo",
+    "PathConfig", 
+    "EnvironmentConfig",
+    "DatabaseConfig",
+    "LLMConfig",
+    "APIResponse",
+    "HealthCheckResponse",
+    "get_global_config",
+    "set_global_config",
+    
+    # 依赖管理
+    "VirtualEnvironmentManager",
+    "DependencyChecker",
+    "ProjectInitializer",
+    "check_system_requirements",
+    "initialize_testagent_project"
 ]
 
 

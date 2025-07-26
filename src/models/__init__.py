@@ -4,6 +4,10 @@ from .types import TaskType, StepType, AgentType, LLMType
 from .state import TestAgentState, Resource
 from .execution import ExecutionPlan, ExecutionStep
 from .review import ReviewScore, TestCaseReview, TestScriptReview, RequirementReview
+from .workspace import (
+    TaskStatus, FileType, FileReference, TaskMetadata, 
+    WorkspaceState, TaskRecoveryInfo, GlobalState
+)
 
 __all__ = [
     # 基础类型
@@ -21,5 +25,13 @@ __all__ = [
     "ReviewScore",
     "TestCaseReview",
     "TestScriptReview",
-    "RequirementReview"
+    "RequirementReview",
+    # 工作空间模型
+    "TaskStatus",
+    "FileType", 
+    "FileReference",
+    "TaskMetadata",
+    "WorkspaceState",
+    "TaskRecoveryInfo",
+    "GlobalState"
 ]

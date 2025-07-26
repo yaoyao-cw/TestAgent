@@ -138,6 +138,19 @@ class LoggingConfig(BaseModel):
         return v.upper()
 
 
+class SandboxConfig(BaseModel):
+    """沙盒配置"""
+    prefer_e2b: bool = Field(default=True, description="优先使用E2B沙盒")
+    e2b_api_key: Optional[str] = Field(default=None, description="E2B API密钥")
+    e2b_template_id: str = Field(default="python3", description="E2B模板ID")
+    timeout: int = Field(default=60, ge=1, le=300, description="执行超时时间(秒)")
+    memory_limit: str = Field(default="512m", description="内存限制")
+    cpu_limit: float = Field(default=1.0, ge=0.1, le=8.0, description="CPU限制(核心数)")
+    max_sandboxes: int = Field(default=3, ge=1, le=10, description="最大沙盒数量")
+    enable_package_install: bool = Field(default=True, description="允许安装包")
+    allowed_packages: List[str] = Field(default_factory=lambda: ["pytest", "requests", "numpy", "pandas"], description="允许安装的包")
+
+
 class TestAgentSettings(BaseSettings):
     """TestAgent主配置类"""
     
@@ -145,6 +158,9 @@ class TestAgentSettings(BaseSettings):
     debug: bool = Field(default=False, description="调试模式")
     testing: bool = Field(default=False, description="测试模式")
     version: str = Field(default="1.0.0", description="版本号")
+    
+    # E2B沙盒配置
+    E2B_API_KEY: Optional[str] = Field(default=None, description="E2B API密钥")
     
     # 兼容性字段（从环境变量中读取但不验证）
     log_level: Optional[str] = Field(default=None, description="日志级别（兼容性）")
@@ -162,6 +178,7 @@ class TestAgentSettings(BaseSettings):
     api: APIConfig = Field(default_factory=APIConfig)
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    sandbox: SandboxConfig = Field(default_factory=SandboxConfig)
     
     # 便捷属性
     @property

@@ -1,0 +1,151 @@
+# E2B沙盒配置示例
+
+# 是否优先使用E2B沙盒（如果可用）
+prefer_e2b: true
+
+# E2B API密钥（也可以通过环境变量E2B_API_KEY设置）
+e2b_api_key: null
+
+# E2B模板ID（默认使用Python3模板）
+e2b_template_id: "python3"
+
+# 执行超时时间（秒）
+timeout: 60
+
+# 内存限制
+memory_limit: "512m"
+
+# CPU限制（核心数）
+cpu_limit: 1.0
+
+# 最大沙盒数量（用于沙盒池管理）
+max_sandboxes: 3
+
+# 是否允许安装Python包
+enable_package_install: true
+
+# 允许安装的包列表（空列表表示允许所有包）
+allowed_packages:
+  - pytest
+  - pytest-json-report
+  - requests
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - beautifulsoup4
+  - lxml
+  - openpyxl
+  - pillow
+  - selenium
+  - flask
+  - fastapi
+  - sqlalchemy
+  - redis
+  - pymongo
+  - psycopg2-binary
+  - mysql-connector-python
+
+# 安全设置
+security:
+  # 是否启用代码安全检查
+  enable_code_scanning: true
+  
+  # 禁止的模块和函数
+  forbidden_modules:
+    - os.system
+    - subprocess.call
+    - eval
+    - exec
+    - __import__
+  
+  # 禁止的文件操作
+  forbidden_paths:
+    - "/etc"
+    - "/proc"
+    - "/sys"
+    - "/dev"
+    - "/root"
+    - "/home"
+  
+  # 网络访问限制
+  network_restrictions:
+    # 是否允许网络访问
+    allow_network: true
+    
+    # 允许的域名（空列表表示允许所有）
+    allowed_domains: []
+    
+    # 禁止的域名
+    forbidden_domains:
+      - "malicious-site.com"
+    
+    # 允许的端口
+    allowed_ports:
+      - 80
+      - 443
+      - 8000
+      - 8080
+
+# 监控设置
+monitoring:
+  # 是否启用资源监控
+  enable_monitoring: true
+  
+  # 监控间隔（秒）
+  monitoring_interval: 1
+  
+  # 资源使用阈值
+  thresholds:
+    cpu_percent: 80
+    memory_percent: 90
+    disk_usage_mb: 1000
+  
+  # 是否记录执行日志
+  log_execution: true
+  
+  # 日志级别
+  log_level: "INFO"
+
+# 缓存设置
+cache:
+  # 是否启用沙盒缓存
+  enable_cache: true
+  
+  # 缓存过期时间（秒）
+  cache_ttl: 3600
+  
+  # 最大缓存大小
+  max_cache_size: 100
+
+# 错误处理
+error_handling:
+  # 最大重试次数
+  max_retries: 3
+  
+  # 重试间隔（秒）
+  retry_interval: 5
+  
+  # 是否在错误时保留沙盒环境（用于调试）
+  preserve_on_error: false
+  
+  # 错误恢复策略
+  recovery_strategy: "restart"  # restart, fallback, abort
+
+# 性能优化
+performance:
+  # 是否启用沙盒预热
+  enable_warmup: true
+  
+  # 预热沙盒数量
+  warmup_count: 1
+  
+  # 是否启用并行执行
+  enable_parallel: true
+  
+  # 最大并行数
+  max_parallel: 3
+  
+  # 是否启用结果缓存
+  enable_result_cache: true

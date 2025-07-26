@@ -36,6 +36,22 @@ from .decorators import (
 )
 from .tool_manager import ToolManager, get_tool_manager
 
+# 工具状态机和约束解码组件
+from .state_machine import (
+    ToolStateMachine, AgentState, ToolCallMode, ToolDefinition,
+    get_tool_state_machine, set_agent_state, get_available_tools_for_agent,
+    get_constraint_config_for_llm
+)
+from .constraint_decoder import (
+    ConstraintDecoder, TokenConstraint, get_constraint_decoder,
+    apply_tool_constraints, get_tool_call_prefill
+)
+from .enhanced_tool_manager import (
+    EnhancedToolManager, ToolExecutionContext, get_enhanced_tool_manager,
+    set_tool_context, execute_tool_with_context, get_available_tools_for_current_context,
+    get_llm_constraint_config
+)
+
 __all__ = [
     # 核心工具类
     "PythonREPL",
@@ -60,5 +76,31 @@ __all__ = [
     "list_available_tools",
     "get_tool_metrics",
     "get_tool_info",
-    "get_tool_manager"
+    "get_tool_manager",
+    
+    # 工具状态机组件
+    "ToolStateMachine",
+    "AgentState",
+    "ToolCallMode", 
+    "ToolDefinition",
+    "get_tool_state_machine",
+    "set_agent_state",
+    "get_available_tools_for_agent",
+    "get_constraint_config_for_llm",
+    
+    # 约束解码组件
+    "ConstraintDecoder",
+    "TokenConstraint",
+    "get_constraint_decoder",
+    "apply_tool_constraints",
+    "get_tool_call_prefill",
+    
+    # 增强工具管理器
+    "EnhancedToolManager",
+    "ToolExecutionContext",
+    "get_enhanced_tool_manager",
+    "set_tool_context",
+    "execute_tool_with_context",
+    "get_available_tools_for_current_context",
+    "get_llm_constraint_config"
 ]

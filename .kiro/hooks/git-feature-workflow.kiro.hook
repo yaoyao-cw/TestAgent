@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Git功能分支工作流",
+  "description": "监控代码文件变化，自动管理git功能分支的创建、提交和集成到开发分支的完整工作流程",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "src/**/*.py",
+      "frontend/src/**/*.ts",
+      "frontend/src/**/*.tsx",
+      "tests/**/*.py",
+      "config/**/*.yaml",
+      "config/**/*.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检测到代码文件变化。请执行以下git工作流程操作：\n\n1. 如果当前不在功能分支上，创建新的功能分支：\n   - 从main分支创建feature分支\n   - 分支命名格式：feature/功能描述\n   \n2. 对于代码修改：\n   - 添加变更的文件到git暂存区\n   - 使用规范的提交信息格式提交代码\n   - 推送到远程功能分支\n   \n3. 如果功能开发完成：\n   - 运行测试确保代码质量\n   - 将功能分支合并到develop分支进行集成测试\n   - 推送更新到远程develop分支\n\n请根据当前git状态和文件变化情况，执行相应的git操作，并提供操作结果反馈。"
+  }
+}

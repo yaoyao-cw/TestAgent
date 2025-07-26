@@ -1,0 +1,95 @@
+# RAG服务配置示例文件
+# 复制此文件为 rag_services.yaml 并根据需要修改配置
+
+services:
+  # ChromaDB主服务 - 本地向量数据库
+  chromadb_primary:
+    name: "chromadb_primary"
+    service_type: "chromadb"
+    priority: "primary"
+    enabled: true
+    config:
+      persist_directory: "./data/vectordb"
+      collection_name: "testagent_knowledge"
+      embedding_model: "text-embedding-ada-002"
+      embedding_provider: "openai"
+    health_check_interval: 60
+    max_failures: 3
+    failure_timeout: 300
+
+  # RAGFlow次要服务 - 企业级RAG平台
+  ragflow_secondary:
+    name: "ragflow_secondary"
+    service_type: "ragflow"
+    priority: "secondary"
+    enabled: false  # 默认禁用，需要时启用
+    config:
+      api_url: "http://localhost:9380"
+      api_key: "${RAGFLOW_API_KEY}"  # 从环境变量获取
+      dataset_id: "testagent_dataset"
+      timeout: 30
+      max_retries: 3
+    health_check_interval: 120
+    max_failures: 2
+    failure_timeout: 600
+
+  # QAnything备用服务 - 开源RAG解决方案
+  qanything_fallback:
+    name: "qanything_fallback"
+    service_type: "qanything"
+    priority: "fallback"
+    enabled: false  # 默认禁用，需要时启用
+    config:
+      api_url: "http://localhost:8777"
+      api_key: "${QANYTHING_API_KEY}"  # 从环境变量获取
+      knowledge_base_id: "testagent_kb"
+      timeout: 30
+      max_retries: 3
+    health_check_interval: 180
+    max_failures: 2
+    failure_timeout: 900
+
+  # 自研RAG服务 - 自定义RAG实现
+  custom_rag_backup:
+    name: "custom_rag_backup"
+    service_type: "custom"
+    priority: "fallback"
+    enabled: false  # 默认禁用，需要时启用
+    config:
+      api_url: "http://localhost:8080"
+      api_key: "${CUSTOM_RAG_API_KEY}"  # 从环境变量获取
+      model_name: "custom-embedding-model"
+      index_name: "testagent_index"
+      timeout: 30
+      max_retries: 3
+      custom_headers:
+        "X-Client-Version": "1.0.0"
+        "X-Service-Name": "TestAgent"
+    health_check_interval: 300
+    max_failures: 2
+    failure_timeout: 1200
+
+# 全局设置
+global_settings:
+  # 默认检索参数
+  default_top_k: 5
+  default_similarity_threshold: 0.7
+  
+  # 故障转移设置
+  enable_auto_failover: true
+  enable_health_checks: true
+  
+  # 日志设置
+  log_level: "INFO"
+  
+  # 性能设置
+  max_concurrent_requests: 10
+  request_timeout: 30
+  
+  # 缓存设置
+  enable_result_cache: true
+  cache_ttl: 3600  # 1小时
+  
+  # 监控设置
+  enable_metrics: true
+  metrics_collection_interval: 60
