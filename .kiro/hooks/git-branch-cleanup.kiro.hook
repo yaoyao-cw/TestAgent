@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Git分支清理工具",
+  "description": "自动清理已合并的功能分支，保持仓库整洁，遵循git-workflow.md最佳实践",
+  "version": "1.0",
+  "when": {
+    "type": "userTriggered",
+    "patterns": []
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "🧹 执行Git分支清理操作。请按照git-workflow.md最佳实践清理仓库：\n\n## 分支清理工作流程\n\n### 1. 分支状态分析\n```bash\n# 查看所有分支\ngit branch -a\n\n# 查看已合并到main的分支\ngit branch --merged main\n\n# 查看已合并到develop的分支\ngit branch --merged develop\n\n# 查看远程分支状态\ngit remote prune origin\n```\n\n### 2. 本地分支清理\n```bash\n# 删除已合并到main的功能分支（排除main和develop）\ngit branch --merged main | grep -E \"^\\s*(feature|fix|docs|refactor)/\" | xargs -n 1 git branch -d\n\n# 手动删除特定分支\ngit branch -d feature/分支名称\n\n# 强制删除未合并的分支（谨慎使用）\ngit branch -D feature/废弃的分支名称\n```\n\n### 3. 远程分支清理\n```bash\n# 删除远程已合并的功能分支\ngit push origin --delete feature/分支名称\n\n# 清理本地对远程分支的引用\ngit remote prune origin\n\n# 查看清理后的状态\ngit branch -a\n```\n\n### 4. 分支清理检查清单\n\n#### 可以安全删除的分支：\n- ✅ 已合并到main分支的feature分支\n- ✅ 已合并到main分支的fix分支\n- ✅ 已完成的docs分支\n- ✅ 已完成的refactor分支\n- ✅ 已合并的hotfix分支\n\n#### 需要保留的分支：\n- 🔒 main分支（永远不删除）\n- 🔒 develop分支（永远不删除）\n- ⚠️ 正在开发中的feature分支\n- ⚠️ 未合并但仍需要的分支\n\n### 5. 自动化清理脚本\n```bash\n#!/bin/bash\n# 安全的分支清理脚本\n\necho \"🔍 分析分支状态...\"\n\n# 更新远程分支信息\ngit fetch origin\ngit remote prune origin\n\n# 列出已合并到main的本地分支\necho \"📋 已合并到main的本地分支：\"\ngit branch --merged main | grep -E \"^\\s*(feature|fix|docs|refactor|hotfix)/\" || echo \"无\"\n\n# 列出已合并到main的远程分支\necho \"📋 已合并到main的远程分支：\"\ngit branch -r --merged main | grep -E \"origin/(feature|fix|docs|refactor|hotfix)/\" || echo \"无\"\n\n# 交互式删除确认\necho \"⚠️ 请手动确认要删除的分支，避免误删除重要分支\"\n```\n\n### 6. 清理后验证\n```bash\n# 验证重要分支仍然存在\ngit branch | grep -E \"(main|develop)\"\n\n# 检查工作目录状态\ngit status\n\n# 验证远程连接正常\ngit remote -v\n```\n\n## ⚠️ 清理注意事项\n\n### 删除前确认：\n- 分支确实已经合并完成\n- 没有未推送的重要提交\n- 团队成员不再需要该分支\n- 相关的Pull Request已关闭\n\n### 安全措施：\n- 优先删除本地分支，再删除远程分支\n- 对于重要分支，先备份再删除\n- 使用`git branch -d`而非`git branch -D`\n- 定期执行清理，避免分支堆积\n\n### 恢复误删分支：\n```bash\n# 查看最近的操作日志\ngit reflog\n\n# 恢复误删的分支\ngit checkout -b feature/恢复的分支名 HEAD@{n}\n```\n\n**请谨慎执行分支删除操作，确认分支确实不再需要后再删除。建议先在测试环境验证清理脚本的效果。**"
+  }
+}

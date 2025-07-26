@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Git紧急修复工作流",
+  "description": "处理生产环境紧急问题的快速修复工作流程，严格遵循git-workflow.md中的紧急修复流程",
+  "version": "1.0",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "src/**/*.py",
+      "frontend/src/**/*.ts",
+      "frontend/src/**/*.tsx",
+      "config/**/*.yaml",
+      "config/**/*.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "🚨 检测到可能需要紧急修复的代码变化。请按照git-workflow.md规范执行紧急修复流程：\n\n## 紧急修复工作流程\n\n### 1. 创建hotfix分支\n```bash\n# 从main分支创建热修复分支\ngit checkout main\ngit pull origin main\ngit checkout -b hotfix/紧急问题描述\n```\n\n### 2. 修复问题\n- 专注于修复关键问题，避免添加新功能\n- 保持修改最小化，降低引入新问题的风险\n- 确保修复针对根本原因，而非症状\n\n### 3. 测试验证\n```bash\n# 运行完整测试套件\npython -m pytest tests/ -v\n\n# 运行特定的回归测试\n# 验证修复效果\n# 确保没有破坏现有功能\n```\n\n### 4. 代码质量检查\n```bash\n# 代码格式化\npython -m black src/ tests/\n\n# 代码质量检查\npython -m flake8 src/ tests/\n```\n\n### 5. 提交和合并\n```bash\n# 使用规范的提交信息\ngit add .\ngit commit -m \"hotfix: 修复生产环境关键问题的具体描述\"\n\n# 合并到main分支\ngit checkout main\ngit merge hotfix/紧急问题描述\ngit push origin main\n\n# 同时合并到develop分支（如果存在）\ngit checkout develop\ngit merge hotfix/紧急问题描述\ngit push origin develop\n```\n\n### 6. 清理和标记\n```bash\n# 删除hotfix分支\ngit branch -d hotfix/紧急问题描述\n\n# 创建版本标签（建议）\ngit tag -a v1.0.1 -m \"紧急修复版本1.0.1\"\ngit push origin v1.0.1\n```\n\n## ⚠️ 紧急修复注意事项\n- 仅用于修复生产环境的关键问题\n- 修改范围应该最小化\n- 必须经过充分测试\n- 需要同时更新main和develop分支\n- 修复后应立即部署到生产环境\n- 考虑创建版本标签便于追踪\n\n**请确认这是真正的紧急修复场景，然后执行相应的操作步骤。**"
+  }
+}

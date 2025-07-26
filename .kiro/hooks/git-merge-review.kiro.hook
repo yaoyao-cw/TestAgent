@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Git合并前代码审查",
+  "description": "在合并分支前执行全面的代码审查和质量检查，确保符合git-workflow.md规范",
+  "version": "1.0",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "**/*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "🔍 准备执行合并前代码审查。请按照git-workflow.md规范进行全面检查：\n\n## 合并前检查清单\n\n### 1. 分支状态检查\n- 检查当前分支类型和命名是否符合规范\n- 确认分支是从正确的基础分支（main/develop）创建\n- 验证分支没有与目标分支产生冲突\n\n### 2. 代码质量检查\n```bash\n# Python代码格式化检查\npython -m black --check src/ tests/\n\n# Python代码质量检查\npython -m flake8 src/ tests/\n\n# 前端代码检查（如适用）\ncd frontend && npm run lint\n```\n\n### 3. 测试覆盖率检查\n```bash\n# 运行完整测试套件\npython -m pytest tests/ -v --cov=src --cov-report=term-missing\n\n# 确保测试覆盖率达到要求\n# 验证新功能有对应的测试用例\n```\n\n### 4. 提交历史审查\n- 检查提交信息是否符合约定式提交格式\n- 验证每个提交都有清晰的目的和描述\n- 确认没有包含敏感信息或临时代码\n\n### 5. 功能验证\n- 在开发环境验证新功能正常工作\n- 确认没有破坏现有功能\n- 验证边界条件和错误处理\n\n### 6. 文档更新检查\n- 检查是否需要更新API文档\n- 验证README或其他文档是否需要更新\n- 确认代码注释充分且准确\n\n### 7. 依赖和配置检查\n- 检查requirements.txt或package.json是否需要更新\n- 验证配置文件变更的合理性\n- 确认环境变量或配置项的文档化\n\n### 8. 安全性检查\n- 检查是否引入了安全漏洞\n- 验证输入验证和数据清理\n- 确认没有硬编码的敏感信息\n\n## 合并操作建议\n\n### 合并到develop分支（集成测试）\n```bash\ngit checkout develop\ngit pull origin develop\ngit merge feature/分支名称\n# 运行集成测试\npython -m pytest tests/test_integration.py -v\ngit push origin develop\n```\n\n### 合并到main分支（生产发布）\n```bash\n# 确保develop分支已经充分测试\ngit checkout main\ngit pull origin main\ngit merge develop\n# 运行完整测试套件\npython -m pytest tests/ -v\ngit push origin main\n# 创建版本标签\ngit tag -a v1.x.x -m \"发布版本1.x.x\"\ngit push origin v1.x.x\n```\n\n## ✅ 检查清单确认\n请确认以下项目已完成：\n- [ ] 代码已通过所有测试\n- [ ] 代码符合项目编码规范\n- [ ] 已添加必要的测试用例\n- [ ] 文档已更新（如需要）\n- [ ] 功能已在开发环境验证\n- [ ] 没有合并冲突\n- [ ] 提交信息清晰明确\n- [ ] 安全性检查通过\n- [ ] 依赖更新合理\n\n**请逐项检查上述内容，确认无误后再执行合并操作。**"
+  }
+}
