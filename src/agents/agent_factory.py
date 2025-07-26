@@ -3,7 +3,7 @@
 提供统一的智能体创建和管理接口。
 """
 
-from typing import Dict, Any, Optional, Type, Union
+from typing import Dict, Any, Optional, Type, Union, List
 from ..models.types import AgentType
 from ..models.workspace import GlobalState
 from ..core.base_agent import BaseAgent
