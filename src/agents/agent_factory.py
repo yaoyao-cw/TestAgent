@@ -33,12 +33,12 @@ class AgentFactory:
         self.agent_classes = {
             AgentType.COORDINATOR: CoordinatorAgent,
             AgentType.PLANNER: PlannerAgent,
+            AgentType.TESTER: TesterAgent,
+            AgentType.CODER: CoderAgent,
+            AgentType.EXECUTOR: ExecutorAgent,
             AgentType.REVIEWER: ReviewerAgent,
             AgentType.REPORTER: ReporterAgent,
             "test_team": TestTeamRouter,  # 特殊的路由器
-            "tester": TesterAgent,
-            "coder": CoderAgent,
-            "executor": ExecutorAgent,
             "human": HumanAgent,
         }
 
@@ -46,12 +46,12 @@ class AgentFactory:
         self.agent_creators = {
             AgentType.COORDINATOR: create_coordinator_agent,
             AgentType.PLANNER: create_planner_agent,
+            AgentType.TESTER: create_tester_agent,
+            AgentType.CODER: create_coder_agent,
+            AgentType.EXECUTOR: create_executor_agent,
             AgentType.REVIEWER: create_reviewer_agent,
             AgentType.REPORTER: create_reporter_agent,
             "test_team": create_test_team_router,
-            "tester": create_tester_agent,
-            "coder": create_coder_agent,
-            "executor": create_executor_agent,
             "human": create_human_agent,
         }
 

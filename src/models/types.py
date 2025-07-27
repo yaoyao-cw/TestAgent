@@ -66,8 +66,14 @@ class AgentType(Enum):
     RESEARCHER = "researcher"
     """研究员"""
 
+    TESTER = "tester"
+    """测试员"""
+
     CODER = "coder"
     """编码员"""
+
+    EXECUTOR = "executor"
+    """执行器"""
 
     REPORTER = "reporter"
     """报告员"""
