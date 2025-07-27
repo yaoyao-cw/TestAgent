@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 """测试优化版本的Python REPL工具"""
 
-import sys
 import os
+import sys
 import time
 
 # 导入优化版本
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "tools"))
 
-from python_repl_optimized import (
-    python_repl_tool,
-    repl,
-    get_repl_info,
-    execute_with_details,
-)
+from python_repl_optimized import (execute_with_details, get_repl_info,
+                                   python_repl_tool, repl)
 
 
 def test_basic_functionality():

@@ -3,17 +3,22 @@
 API服务器中间件
 """
 
-import time
 import logging
-from typing import Dict, Any
-from datetime import datetime, timedelta
+import time
 from collections import defaultdict
+from datetime import datetime, timedelta
+from typing import Any, Dict
 
-from fastapi import Request, Response, HTTPException
+from fastapi import HTTPException, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from ..config.logging_config import get_logger
+from ..security.audit_logger import get_security_audit_logger
+from ..security.auth import get_jwt_authenticator
+from ..security.data_encryption import get_sensitive_data_masker
+from ..security.input_validator import get_input_validator
+from ..security.rate_limiter import get_rate_limiter
 
 logger = get_logger("api_middleware")
 
@@ -50,62 +55,51 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """速率限制中间件"""
 
-    def __init__(self, app, calls_per_minute: int = 60):
+    def __init__(self, app):
         super().__init__(app)
-        self.calls_per_minute = calls_per_minute
-        self.requests = defaultdict(list)
+        self.rate_limiter = get_rate_limiter()
 
     async def dispatch(self, request: Request, call_next):
         """处理请求"""
-        # 获取客户端IP
-        client_ip = self._get_client_ip(request)
+        # 获取用户信息（如果已认证）
+        user_id = None
+        user_role = None
+
+        try:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header[7:]
+                jwt_auth = get_jwt_authenticator()
+                token_payload = jwt_auth.verify_token(token)
+                if token_payload:
+                    user_id = token_payload.user_id
+                    user_role = token_payload.role
+        except Exception:
+            pass  # 忽略认证错误，继续进行速率限制检查
 
         # 检查速率限制
-        if self._is_rate_limited(client_ip):
-            logger.warning(f"速率限制触发: {client_ip}")
+        rate_check = await self.rate_limiter.check_rate_limit(
+            request, user_id, user_role
+        )
+
+        if not rate_check["allowed"]:
+            logger.warning(
+                f"速率限制触发: {request.client.host if request.client else 'unknown'}"
+            )
             return JSONResponse(
                 status_code=429,
-                content={"error": "请求过于频繁，请稍后再试", "retry_after": 60},
+                content={
+                    "error": "请求过于频繁，请稍后再试",
+                    "reason": rate_check["reason"],
+                    "retry_after": rate_check.get("retry_after", 60),
+                },
+                headers={"Retry-After": str(rate_check.get("retry_after", 60))},
             )
-
-        # 记录请求
-        self._record_request(client_ip)
 
         # 处理请求
         response = await call_next(request)
 
         return response
-
-    def _get_client_ip(self, request: Request) -> str:
-        """获取客户端IP"""
-        # 检查代理头
-        forwarded_for = request.headers.get("X-Forwarded-For")
-        if forwarded_for:
-            return forwarded_for.split(",")[0].strip()
-
-        real_ip = request.headers.get("X-Real-IP")
-        if real_ip:
-            return real_ip
-
-        # 使用客户端IP
-        return request.client.host if request.client else "unknown"
-
-    def _is_rate_limited(self, client_ip: str) -> bool:
-        """检查是否超过速率限制"""
-        now = datetime.now()
-        minute_ago = now - timedelta(minutes=1)
-
-        # 清理过期请求
-        self.requests[client_ip] = [
-            req_time for req_time in self.requests[client_ip] if req_time > minute_ago
-        ]
-
-        # 检查请求数量
-        return len(self.requests[client_ip]) >= self.calls_per_minute
-
-    def _record_request(self, client_ip: str):
-        """记录请求"""
-        self.requests[client_ip].append(datetime.now())
 
 
 class SecurityMiddleware(BaseHTTPMiddleware):
@@ -138,27 +132,74 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, protected_paths: list = None):
         super().__init__(app)
         self.protected_paths = protected_paths or ["/api/v1/"]
+        self.jwt_auth = get_jwt_authenticator()
+        self.audit_logger = get_security_audit_logger()
 
     async def dispatch(self, request: Request, call_next):
         """处理请求"""
+        client_ip = self._get_client_ip(request)
+        user_agent = request.headers.get("user-agent")
+
         # 检查是否需要认证
         if self._requires_auth(request.url.path):
             # 验证认证
-            if not await self._verify_auth(request):
+            auth_result = await self._verify_auth(request)
+            if not auth_result["valid"]:
+                self.audit_logger.log_security_event(
+                    "authentication_failed",
+                    "warning",
+                    f"认证失败: {auth_result['reason']}",
+                    {
+                        "path": request.url.path,
+                        "reason": auth_result["reason"],
+                        "client_ip": client_ip,
+                    },
+                    source_ip=client_ip,
+                    user_agent=user_agent,
+                    result="failure",
+                )
+
                 return JSONResponse(
                     status_code=401,
-                    content={"error": "未授权访问", "message": "请提供有效的认证信息"},
+                    content={
+                        "error": "未授权访问",
+                        "message": "请提供有效的认证信息",
+                        "reason": auth_result["reason"],
+                    },
                 )
+
+            # 将用户信息添加到请求状态
+            request.state.user = auth_result.get("user")
 
         # 处理请求
         response = await call_next(request)
 
         return response
 
+    def _get_client_ip(self, request: Request) -> str:
+        """获取客户端IP"""
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            return forwarded_for.split(",")[0].strip()
+
+        real_ip = request.headers.get("X-Real-IP")
+        if real_ip:
+            return real_ip
+
+        return request.client.host if request.client else "unknown"
+
     def _requires_auth(self, path: str) -> bool:
         """检查路径是否需要认证"""
         # 公开路径
-        public_paths = ["/", "/health", "/docs", "/redoc", "/openapi.json"]
+        public_paths = [
+            "/",
+            "/health",
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+            "/api/v1/auth/login",
+            "/api/v1/auth/refresh",
+        ]
 
         if path in public_paths:
             return False
@@ -166,38 +207,33 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         # 检查受保护路径
         return any(path.startswith(protected) for protected in self.protected_paths)
 
-    async def _verify_auth(self, request: Request) -> bool:
+    async def _verify_auth(self, request: Request) -> Dict[str, Any]:
         """验证认证信息"""
         # 检查API密钥
         api_key = request.headers.get("X-API-Key")
         if api_key:
-            return await self._verify_api_key(api_key)
+            if await self._verify_api_key(api_key):
+                return {"valid": True, "method": "api_key"}
+            else:
+                return {"valid": False, "reason": "invalid_api_key"}
 
         # 检查Bearer Token
         authorization = request.headers.get("Authorization")
         if authorization and authorization.startswith("Bearer "):
             token = authorization[7:]
-            return await self._verify_bearer_token(token)
+            token_payload = self.jwt_auth.verify_token(token)
+            if token_payload:
+                return {"valid": True, "method": "bearer_token", "user": token_payload}
+            else:
+                return {"valid": False, "reason": "invalid_bearer_token"}
 
-        return False
+        return {"valid": False, "reason": "no_credentials"}
 
     async def _verify_api_key(self, api_key: str) -> bool:
         """验证API密钥"""
-        # TODO: 实现API密钥验证逻辑
-        # 这里可以从数据库或配置文件中验证API密钥
-        valid_keys = ["test-api-key", "demo-key"]  # 示例密钥
+        # 简单的API密钥验证（实际应用中应该从数据库或配置中获取）
+        valid_keys = ["test-api-key", "demo-key"]
         return api_key in valid_keys
-
-    async def _verify_bearer_token(self, token: str) -> bool:
-        """验证Bearer Token"""
-        # TODO: 实现JWT或其他token验证逻辑
-        try:
-            # 这里可以解析和验证JWT token
-            # 或者从数据库验证session token
-            return len(token) > 10  # 简单示例
-        except Exception as e:
-            logger.error(f"Token验证失败: {e}")
-            return False
 
 
 class CacheMiddleware(BaseHTTPMiddleware):
@@ -273,6 +309,99 @@ class CacheMiddleware(BaseHTTPMiddleware):
 
         except Exception as e:
             logger.error(f"缓存响应失败: {e}")
+
+
+class InputValidationMiddleware(BaseHTTPMiddleware):
+    """输入验证中间件"""
+
+    def __init__(self, app):
+        super().__init__(app)
+        self.input_validator = get_input_validator()
+        self.audit_logger = get_security_audit_logger()
+        self.masker = get_sensitive_data_masker()
+
+    async def dispatch(self, request: Request, call_next):
+        """处理请求"""
+        client_ip = self._get_client_ip(request)
+
+        # 验证请求头
+        validation_issues = []
+
+        # 验证User-Agent
+        user_agent = request.headers.get("user-agent", "")
+        if user_agent:
+            ua_result = self.input_validator.validate_string(
+                user_agent, max_length=512, check_injections=True
+            )
+            if not ua_result.is_valid:
+                validation_issues.extend(ua_result.issues)
+
+        # 验证查询参数
+        for key, value in request.query_params.items():
+            param_result = self.input_validator.validate_string(
+                str(value), max_length=1024, check_injections=True
+            )
+            if not param_result.is_valid:
+                validation_issues.extend(
+                    [
+                        {**issue, "location": f"query_param_{key}"}
+                        for issue in param_result.issues
+                    ]
+                )
+
+        # 如果有严重的验证问题，阻止请求
+        critical_issues = [
+            issue for issue in validation_issues if issue.get("severity") == "critical"
+        ]
+
+        if critical_issues:
+            self.audit_logger.log_security_event(
+                "input_validation_blocked",
+                "critical",
+                "输入验证失败，请求被阻止",
+                {
+                    "path": str(request.url),
+                    "client_ip": client_ip,
+                    "issues": critical_issues,
+                },
+                source_ip=client_ip,
+                user_agent=user_agent,
+                result="blocked",
+            )
+
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": "输入验证失败",
+                    "message": "请求包含潜在的安全威胁",
+                    "issues": len(critical_issues),
+                },
+            )
+
+        # 处理请求
+        response = await call_next(request)
+
+        # 脱敏响应中的敏感信息（仅在开发模式下）
+        if hasattr(response, "body") and response.status_code >= 400:
+            try:
+                # 对错误响应进行脱敏
+                pass  # 实际实现中可以对响应内容进行脱敏
+            except Exception:
+                pass
+
+        return response
+
+    def _get_client_ip(self, request: Request) -> str:
+        """获取客户端IP"""
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            return forwarded_for.split(",")[0].strip()
+
+        real_ip = request.headers.get("X-Real-IP")
+        if real_ip:
+            return real_ip
+
+        return request.client.host if request.client else "unknown"
 
 
 class CompressionMiddleware(BaseHTTPMiddleware):

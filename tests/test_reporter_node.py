@@ -3,17 +3,18 @@
 报告员节点单元测试
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any
 from datetime import datetime
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
 
-from src.graph.reporter_node import ReporterNode
-from src.models.state import TestAgentState
-from src.models.execution import ExecutionStep, StepType
-from src.models.types import TaskType
+import pytest
+
 from src.exceptions import TestAgentException
+from src.graph.reporter_node import ReporterNode
+from src.models.execution import ExecutionStep, StepType
+from src.models.state import TestAgentState
+from src.models.types import TaskType
 
 
 class TestReporterNode:

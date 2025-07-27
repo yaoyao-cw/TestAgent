@@ -3,20 +3,20 @@
 研究员节点测试
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
-from langchain_core.messages import HumanMessage, AIMessage
-
-import sys
 import os
+import sys
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+from langchain_core.messages import AIMessage, HumanMessage
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.models.state import TestAgentState, TaskType
-from src.models.execution import ExecutionPlan, ExecutionStep, StepType
-from src.graph.nodes import ResearcherNode
 from src.exceptions import TestAgentException
+from src.graph.nodes import ResearcherNode
+from src.models.execution import ExecutionPlan, ExecutionStep, StepType
+from src.models.state import TaskType, TestAgentState
 
 
 class TestResearcherNode:

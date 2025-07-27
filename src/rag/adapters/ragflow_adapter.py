@@ -1,21 +1,17 @@
 """RAGFlow适配器实现"""
 
+import asyncio
 import time
 import uuid
-import aiohttp
-import asyncio
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 
 from ...config.logging_config import get_logger
 from ...exceptions import RAGServiceException
-from ..interfaces import (
-    RAGServiceInterface,
-    Document,
-    SearchResult,
-    ServiceHealthInfo,
-    RAGServiceStatus,
-)
+from ..interfaces import (Document, RAGServiceInterface, RAGServiceStatus,
+                          SearchResult, ServiceHealthInfo)
 
 logger = get_logger("ragflow_adapter")
 

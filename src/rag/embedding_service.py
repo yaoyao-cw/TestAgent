@@ -1,9 +1,10 @@
 """向量化服务模块"""
 
 import asyncio
-from typing import List, Dict, Any, Optional
-import numpy as np
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 
 # 向量化库
 try:
@@ -21,6 +22,7 @@ except ImportError:
     OPENAI_AVAILABLE = False
 
 import logging
+
 from ..config.simple_settings import get_settings
 from ..exceptions import RAGServiceException
 from ..utils.performance import async_monitor_performance

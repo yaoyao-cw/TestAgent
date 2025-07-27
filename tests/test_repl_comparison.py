@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """比较不同Python REPL实现的效果"""
 
-import sys
-import os
 import logging
+import os
+import sys
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)

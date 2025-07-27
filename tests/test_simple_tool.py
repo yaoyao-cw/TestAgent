@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """直接测试简化的Python REPL工具"""
 
-import sys
-import os
 import logging
+import os
+import sys
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)

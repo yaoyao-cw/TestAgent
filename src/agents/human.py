@@ -4,14 +4,14 @@
 """
 
 import json
-from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
-from ..core.base_agent import SimpleAgent, AgentInput, AgentOutput
+from ..config.logging_config import get_logger
+from ..core.base_agent import AgentInput, AgentOutput, SimpleAgent
 from ..models.types import AgentType
 from ..models.workspace import GlobalState, TaskStatus
-from ..config.logging_config import get_logger
 
 logger = get_logger("human_agent")
 

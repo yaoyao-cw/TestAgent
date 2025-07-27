@@ -5,18 +5,19 @@
 
 import os
 import shutil
-from typing import List, Optional, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Query
+import aiofiles
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, Query,
+                     UploadFile)
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
-import aiofiles
 
+from ...config.logging_config import get_logger
 from ...rag.document_manager import get_document_manager
 from ...rag.vector_store import get_vector_store
-from ...config.logging_config import get_logger
 
 logger = get_logger("documents_api")
 

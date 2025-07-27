@@ -9,6 +9,9 @@
 - 日志配置
 """
 
+from .logging_config import (LoggingManager, configure_module_logger,
+                             create_file_handler, get_logger,
+                             get_logging_manager, init_logging, setup_logging)
 from .settings import TestAgentSettings, get_settings
 
 # from .manager import (
@@ -36,15 +39,6 @@ from .settings import TestAgentSettings, get_settings
 #     auto_fix_config
 # )
 
-from .logging_config import (
-    setup_logging,
-    get_logger,
-    configure_module_logger,
-    create_file_handler,
-    LoggingManager,
-    get_logging_manager,
-    init_logging,
-)
 
 __all__ = [
     # Settings

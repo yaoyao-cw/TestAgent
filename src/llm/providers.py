@@ -1,7 +1,7 @@
 """LLM提供商配置和支持"""
 
-from typing import Dict, List, Optional
 from enum import Enum
+from typing import Dict, List, Optional
 
 
 class LLMProvider(Enum):

@@ -5,15 +5,15 @@
 提供配置验证、自动修复和健康检查功能
 """
 
-import os
 import json
 import logging
-from typing import Dict, List, Any, Tuple, Optional, Callable
+import os
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 try:
-    from .settings import Settings, get_settings
     from .manager import get_config_manager
+    from .settings import Settings, get_settings
 except ImportError:
     # 如果无法导入，提供模拟实现
     Settings = None

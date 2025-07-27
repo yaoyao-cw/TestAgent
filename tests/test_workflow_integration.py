@@ -3,16 +3,18 @@
 工作流集成测试
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
 
-from src.graph.workflow import TestAgentWorkflow, get_workflow, execute_workflow
+import pytest
+
+from src.exceptions import WorkflowException
+from src.graph.workflow import (TestAgentWorkflow, execute_workflow,
+                                get_workflow)
 from src.graph.workflow_manager import WorkflowManager, get_workflow_manager
 from src.models.state import TestAgentState
 from src.models.types import TaskType
-from src.exceptions import WorkflowException
 
 
 class TestWorkflowIntegration:
@@ -287,8 +289,9 @@ class TestWorkflowIntegration:
     def test_execution_status_tracking(self):
         """测试执行状态跟踪"""
         # 创建一个模拟执行记录
-        from src.graph.workflow_manager import WorkflowExecution
         from datetime import datetime
+
+        from src.graph.workflow_manager import WorkflowExecution
 
         execution = WorkflowExecution(
             execution_id="test_status",
@@ -312,8 +315,9 @@ class TestWorkflowIntegration:
     def test_list_executions(self):
         """测试列出执行记录"""
         # 添加一些模拟执行记录
-        from src.graph.workflow_manager import WorkflowExecution
         from datetime import datetime
+
+        from src.graph.workflow_manager import WorkflowExecution
 
         for i in range(3):
             execution = WorkflowExecution(
@@ -342,8 +346,9 @@ class TestWorkflowIntegration:
 
     def test_cancel_execution(self):
         """测试取消执行"""
-        from src.graph.workflow_manager import WorkflowExecution
         from datetime import datetime
+
+        from src.graph.workflow_manager import WorkflowExecution
 
         # 创建运行中的执行
         execution = WorkflowExecution(
@@ -371,8 +376,9 @@ class TestWorkflowIntegration:
 
     def test_cleanup_old_executions(self):
         """测试清理旧执行记录"""
-        from src.graph.workflow_manager import WorkflowExecution
         from datetime import datetime, timedelta
+
+        from src.graph.workflow_manager import WorkflowExecution
 
         # 添加新旧执行记录
         old_time = datetime.now() - timedelta(hours=25)  # 25小时前

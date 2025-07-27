@@ -1,11 +1,12 @@
 """配置模块测试"""
 
-import pytest
 import os
 from unittest.mock import patch
 
+import pytest
+
+from src.config.logging_config import get_logger, setup_logging
 from src.config.settings import Settings, get_settings
-from src.config.logging_config import setup_logging, get_logger
 
 
 class TestSettings:

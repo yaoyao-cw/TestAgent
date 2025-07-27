@@ -3,8 +3,8 @@
 import os
 import time
 import uuid
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 try:
     import chromadb
@@ -16,14 +16,9 @@ except ImportError:
 
 from ...config.logging_config import get_logger
 from ...exceptions import RAGServiceException
-from ..interfaces import (
-    RAGServiceInterface,
-    Document,
-    SearchResult,
-    ServiceHealthInfo,
-    RAGServiceStatus,
-)
 from ..embedding_service import EmbeddingService
+from ..interfaces import (Document, RAGServiceInterface, RAGServiceStatus,
+                          SearchResult, ServiceHealthInfo)
 
 logger = get_logger("chromadb_adapter")
 

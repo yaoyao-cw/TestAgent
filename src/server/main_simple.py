@@ -3,15 +3,15 @@
 TestAgent Web API服务简化版本
 """
 
-import os
 import logging
+import os
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import uvicorn
 
 # 简化版应用
 app = FastAPI(

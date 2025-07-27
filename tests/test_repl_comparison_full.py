@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """比较不同Python REPL实现的效果"""
 
-import sys
 import os
+import sys
 import time
 
 # 直接导入简化版本

@@ -6,17 +6,18 @@
 """
 
 import asyncio
-import threading
-import multiprocessing
-import logging
-import time
 import gc
-from typing import Any, Dict, List, Optional, Callable, Union, Awaitable
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-from functools import wraps, lru_cache
-from dataclasses import dataclass
-from contextlib import asynccontextmanager
+import logging
+import multiprocessing
+import threading
+import time
 import weakref
+from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
+                                as_completed)
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from functools import lru_cache, wraps
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
 logger = logging.getLogger("performance_optimizer")
 

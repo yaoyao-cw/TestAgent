@@ -5,17 +5,18 @@
 实现注意力引导、上下文多样性注入和错误驱动的适应性学习机制
 """
 
+import hashlib
 import json
 import random
-import hashlib
-from typing import Any, Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
-from .error_recovery_manager import ErrorRecoveryManager, ErrorType, ErrorContext
-from ..models.workspace import GlobalState
 from ..config.logging_config import get_logger
+from ..models.workspace import GlobalState
+from .error_recovery_manager import (ErrorContext, ErrorRecoveryManager,
+                                     ErrorType)
 
 logger = get_logger("agent_behavior_optimizer")
 

@@ -1,9 +1,10 @@
 """执行计划和步骤相关数据模型"""
 
 from typing import List, Optional
+
 from pydantic import BaseModel, Field, validator
 
-from .types import TaskType, StepType
+from .types import StepType, TaskType
 
 
 class ExecutionStep(BaseModel):

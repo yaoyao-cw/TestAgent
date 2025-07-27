@@ -3,14 +3,14 @@
 实现智能体间的消息传递和路由机制，支持动态路由决策和状态管理。
 """
 
-from typing import Dict, Any, Optional, List, Callable
-from enum import Enum
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 from ..models.types import AgentType
 from ..models.workspace import GlobalState
-from .base_agent import BaseAgent, AgentInput, AgentOutput
+from .base_agent import AgentInput, AgentOutput, BaseAgent
 
 
 class RoutingStrategy(Enum):

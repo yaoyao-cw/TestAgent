@@ -3,21 +3,17 @@
 监控和健康检查API路由
 """
 
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 try:
-    from ...core.monitoring import (
-        get_metrics_collector,
-        get_system_monitor,
-        get_health_checker,
-        get_profiler,
-    )
-    from ...core.error_handler import get_error_handler
     from ...config.logging_config import get_logger
+    from ...core.error_handler import get_error_handler
+    from ...core.monitoring import (get_health_checker, get_metrics_collector,
+                                    get_profiler, get_system_monitor)
 except ImportError as e:
     # 如果导入失败，提供模拟实现
     def get_metrics_collector():

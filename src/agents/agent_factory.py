@@ -3,22 +3,21 @@
 提供统一的智能体创建和管理接口。
 """
 
-from typing import Dict, Any, Optional, Type, Union, List
-from ..models.types import AgentType
-from ..models.workspace import GlobalState
-from ..core.base_agent import BaseAgent
-
-from .coordinator import CoordinatorAgent, create_coordinator_agent
-from .planner import PlannerAgent, create_planner_agent
-from .test_team import TestTeamRouter, create_test_team_router
-from .tester import TesterAgent, create_tester_agent
-from .coder import CoderAgent, create_coder_agent
-from .executor import ExecutorAgent, create_executor_agent
-from .reviewer import ReviewerAgent, create_reviewer_agent
-from .reporter import ReporterAgent, create_reporter_agent
-from .human import HumanAgent, create_human_agent
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ..config.logging_config import get_logger
+from ..core.base_agent import BaseAgent
+from ..models.types import AgentType
+from ..models.workspace import GlobalState
+from .coder import CoderAgent, create_coder_agent
+from .coordinator import CoordinatorAgent, create_coordinator_agent
+from .executor import ExecutorAgent, create_executor_agent
+from .human import HumanAgent, create_human_agent
+from .planner import PlannerAgent, create_planner_agent
+from .reporter import ReporterAgent, create_reporter_agent
+from .reviewer import ReviewerAgent, create_reviewer_agent
+from .test_team import TestTeamRouter, create_test_team_router
+from .tester import TesterAgent, create_tester_agent
 
 logger = get_logger("agent_factory")
 

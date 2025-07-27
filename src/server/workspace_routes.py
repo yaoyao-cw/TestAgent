@@ -3,13 +3,14 @@
 提供任务工作空间管理的REST API接口。
 """
 
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, HTTPException, Depends, status
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from ..core.workspace import workspace_manager
 from ..models.types import TaskType
-from ..models.workspace import TaskMetadata, TaskStatus, FileReference
+from ..models.workspace import FileReference, TaskMetadata, TaskStatus
 
 
 # API请求/响应模型

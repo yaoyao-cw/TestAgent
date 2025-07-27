@@ -1,9 +1,10 @@
 """LLM配置管理"""
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, Field
 
-from ..models.types import LLMType, AgentType
+from ..models.types import AgentType, LLMType
 
 
 class LLMConfig(BaseModel):

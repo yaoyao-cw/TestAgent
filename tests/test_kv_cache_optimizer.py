@@ -5,38 +5,29 @@ KV缓存优化系统测试
 测试KV缓存优化系统的各个组件功能
 """
 
-import pytest
 import asyncio
 import time
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
-from src.cache.kv_cache_optimizer import (
-    DeterministicSerializer,
-    PrefixStabilityManager,
-    AppendOnlyContextManager,
-    SessionManager,
-    KVCacheHitMonitor,
-    CachePerformanceAnalyzer,
-    KVCacheOptimizer,
-    get_kv_cache_optimizer,
-    optimize_prompt_for_cache,
-    serialize_deterministically,
-)
+import pytest
 
-from src.cache.cache_hit_monitor import (
-    CacheHitMonitorService,
-    MonitoringConfig,
-    get_cache_hit_monitor_service,
-)
-
-from src.cache.session_manager import (
-    DistributedSessionManager,
-    ConsistentHashRing,
-    LoadBalancer,
-    NodeInfo,
-    get_distributed_session_manager,
-)
+from src.cache.cache_hit_monitor import (CacheHitMonitorService,
+                                         MonitoringConfig,
+                                         get_cache_hit_monitor_service)
+from src.cache.kv_cache_optimizer import (AppendOnlyContextManager,
+                                          CachePerformanceAnalyzer,
+                                          DeterministicSerializer,
+                                          KVCacheHitMonitor, KVCacheOptimizer,
+                                          PrefixStabilityManager,
+                                          SessionManager,
+                                          get_kv_cache_optimizer,
+                                          optimize_prompt_for_cache,
+                                          serialize_deterministically)
+from src.cache.session_manager import (ConsistentHashRing,
+                                       DistributedSessionManager, LoadBalancer,
+                                       NodeInfo,
+                                       get_distributed_session_manager)
 
 
 class TestDeterministicSerializer:

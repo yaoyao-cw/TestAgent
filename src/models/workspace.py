@@ -1,11 +1,12 @@
 """工作空间相关数据模型"""
 
-from typing import Dict, List, Optional, Any
 from datetime import datetime
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
-from .types import TaskType, AgentType
+from pydantic import BaseModel, Field
+
+from .types import AgentType, TaskType
 
 
 class TaskStatus(Enum):

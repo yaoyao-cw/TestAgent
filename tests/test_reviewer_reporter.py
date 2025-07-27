@@ -1,26 +1,21 @@
 """测试Reviewer和Reporter智能体"""
 
-import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime
+from unittest.mock import Mock, patch
 
-from src.agents.reviewer import ReviewerAgent, create_reviewer_agent
+import pytest
+
+from src.agents.human import (HumanAgent, InterventionPriority,
+                              InterventionType, create_human_agent)
+from src.agents.quality_assurance import (QualityAssuranceWorkflow,
+                                          TestCaseQualityChecker,
+                                          TestScriptQualityChecker,
+                                          get_quality_assurance_workflow)
 from src.agents.reporter import ReporterAgent, create_reporter_agent
-from src.agents.human import (
-    HumanAgent,
-    create_human_agent,
-    InterventionType,
-    InterventionPriority,
-)
-from src.agents.quality_assurance import (
-    QualityAssuranceWorkflow,
-    TestCaseQualityChecker,
-    TestScriptQualityChecker,
-    get_quality_assurance_workflow,
-)
-from src.models.workspace import GlobalState, TaskMetadata, TaskStatus
-from src.models.types import TaskType, AgentType
+from src.agents.reviewer import ReviewerAgent, create_reviewer_agent
 from src.core.base_agent import AgentInput
+from src.models.types import AgentType, TaskType
+from src.models.workspace import GlobalState, TaskMetadata, TaskStatus
 
 
 class TestReviewerAgent:

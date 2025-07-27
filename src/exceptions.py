@@ -1,6 +1,6 @@
 """TestAgent异常定义模块"""
 
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
 
 
 class TestAgentException(Exception):

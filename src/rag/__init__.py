@@ -3,33 +3,22 @@
 提供统一的RAG服务接口和多服务管理功能
 """
 
-# 导出核心接口
-from .interfaces import (
-    RAGServiceInterface,
-    Document,
-    SearchResult,
-    ServiceHealthInfo,
-    RAGServiceStatus,
-)
-
 # 导出适配器
-from .adapters import (
-    ChromaDBAdapter,
-    RAGFlowAdapter,
-    QAnythingAdapter,
-    CustomRAGAdapter,
-)
-
+from .adapters import (ChromaDBAdapter, CustomRAGAdapter, QAnythingAdapter,
+                       RAGFlowAdapter)
+from .config_manager import RAGConfigManager
+from .document_parser import DocumentParser
+from .embedding_service import EmbeddingService
+# 导出核心接口
+from .interfaces import (Document, RAGServiceInterface, RAGServiceStatus,
+                         SearchResult, ServiceHealthInfo)
+# 导出原有组件（向后兼容）
+from .rag_service import RAGService
+from .rag_service import RAGServiceManager as LegacyRAGServiceManager
 # 导出管理器
 from .service_manager import RAGServiceManager, ServiceConfig, ServicePriority
-from .config_manager import RAGConfigManager
-
-# 导出原有组件（向后兼容）
-from .rag_service import RAGService, RAGServiceManager as LegacyRAGServiceManager
-from .vector_database import VectorDatabase, ChromaVectorDatabase
-from .embedding_service import EmbeddingService
-from .document_parser import DocumentParser
-from .text_splitter import TextSplitter, SemanticTextSplitter, TextChunk
+from .text_splitter import SemanticTextSplitter, TextChunk, TextSplitter
+from .vector_database import ChromaVectorDatabase, VectorDatabase
 
 __all__ = [
     # 核心接口

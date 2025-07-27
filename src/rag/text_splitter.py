@@ -1,10 +1,10 @@
 """文本分块器模块"""
 
-import re
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
-
 import logging
+import re
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
 from ..config.simple_settings import get_settings
 
 logger = logging.getLogger("text_splitter")

@@ -3,15 +3,16 @@
 编码员节点单元测试
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
 
-from src.graph.coder_node import CoderNode
-from src.models.state import TestAgentState
-from src.models.execution import ExecutionStep, StepType
+import pytest
+
 from src.exceptions import TestAgentException
+from src.graph.coder_node import CoderNode
+from src.models.execution import ExecutionStep, StepType
+from src.models.state import TestAgentState
 
 
 class TestCoderNode:

@@ -4,13 +4,14 @@
 通过token logits遮蔽控制工具可用性，实现约束解码机制
 """
 
-import logging
 import json
-from typing import Dict, List, Set, Optional, Any, Tuple
+import logging
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 import numpy as np
 
-from .state_machine import ToolStateMachine, ToolCallMode, AgentState
+from .state_machine import AgentState, ToolCallMode, ToolStateMachine
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
 """JSON处理工具函数"""
 
 import json
+import logging
 import re
-from typing import Any, Optional, Dict
+from typing import Any, Dict, Optional
 
 # from json_repair import repair_json  # 模块不可用时的降级方案
 
-import logging
 
 logger = logging.getLogger("json_utils")
 

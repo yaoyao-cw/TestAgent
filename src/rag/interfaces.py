@@ -1,9 +1,9 @@
 """RAG服务统一接口定义"""
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 from ..config.logging_config import get_logger
 

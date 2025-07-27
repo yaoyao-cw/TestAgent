@@ -6,12 +6,12 @@
 
 import asyncio
 import json
-import time
-import tempfile
 import os
-from typing import Dict, Any, List, Optional, Union
+import tempfile
+import time
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 try:
     from e2b import Sandbox
@@ -23,6 +23,8 @@ except ImportError:
 
 from ..config.logging_config import get_logger
 from ..config.settings import get_settings
+from ..security.malicious_code_detector import get_malicious_code_detector
+from ..security.sandbox_security import get_sandbox_security_manager
 
 logger = get_logger("e2b_sandbox")
 
@@ -123,6 +125,25 @@ class E2BSandboxExecutor:
         """
         if not self.sandbox:
             raise RuntimeError("沙盒环境未启动")
+
+        # 安全检查
+        security_manager = get_sandbox_security_manager()
+        security_check = security_manager.can_execute_code(code, "python_code")
+
+        if not security_check["can_execute"]:
+            logger.warning(f"代码执行被安全系统阻止: {security_check['reason']}")
+            return {
+                "success": False,
+                "stdout": "",
+                "stderr": f"安全检查失败: {security_check['message']}",
+                "return_code": -1,
+                "execution_time": 0,
+                "memory_usage": None,
+                "error": security_check["message"],
+                "security_report": security_check.get("security_report"),
+                "sandbox_id": self.sandbox.id if hasattr(self.sandbox, "id") else None,
+                "timestamp": datetime.now().isoformat(),
+            }
 
         logger.info("在E2B沙盒中执行Python代码")
 

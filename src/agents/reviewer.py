@@ -4,20 +4,16 @@
 """
 
 import json
-from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
 
-from ..core.base_agent import SimpleAgent, AgentInput, AgentOutput
+from ..config.logging_config import get_logger
+from ..core.base_agent import AgentInput, AgentOutput, SimpleAgent
+from ..llm.service import get_llm_service
+from ..models.review import (RequirementReview, ReviewScore, TestCaseReview,
+                             TestScriptReview)
 from ..models.types import AgentType, TaskType
 from ..models.workspace import GlobalState, TaskStatus
-from ..models.review import (
-    ReviewScore,
-    TestCaseReview,
-    TestScriptReview,
-    RequirementReview,
-)
-from ..llm.service import get_llm_service
-from ..config.logging_config import get_logger
 
 logger = get_logger("reviewer_agent")
 

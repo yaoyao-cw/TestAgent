@@ -1,8 +1,8 @@
 """LLM提供商基础类"""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, AsyncGenerator
 from dataclasses import dataclass
+from typing import Any, AsyncGenerator, Dict, List, Optional
 
 
 @dataclass

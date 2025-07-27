@@ -3,15 +3,16 @@
 人机协作API路由
 """
 
-from typing import List, Optional, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Depends, Query, Body
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from ...collaboration.plan_reviewer import get_plan_reviewer, ReviewStatus
-from ...collaboration.auto_accept_manager import get_auto_accept_manager, AutoAcceptMode
+from ...collaboration.auto_accept_manager import (AutoAcceptMode,
+                                                  get_auto_accept_manager)
 from ...collaboration.feedback_processor import get_feedback_processor
+from ...collaboration.plan_reviewer import ReviewStatus, get_plan_reviewer
 from ...config.logging_config import get_logger
 
 logger = get_logger("collaboration_api")

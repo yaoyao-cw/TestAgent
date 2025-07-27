@@ -1,11 +1,11 @@
 """文档检索工具模块"""
 
-from typing import List, Dict, Any, Optional
 import asyncio
+from typing import Any, Dict, List, Optional
 
 from ..config.logging_config import get_logger
-from ..rag.rag_service import RAGService
 from ..exceptions import RAGServiceException
+from ..rag.rag_service import RAGService
 from ..utils.performance import async_monitor_performance
 
 logger = get_logger("document_retrieval")

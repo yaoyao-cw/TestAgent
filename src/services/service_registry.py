@@ -5,14 +5,14 @@
 """
 
 import asyncio
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Callable, Union
-import logging
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from .health_monitor import HealthStatus, HealthCheckResult, get_health_monitor
 from ..config.logging_config import get_logger
+from .health_monitor import HealthCheckResult, HealthStatus, get_health_monitor
 
 logger = get_logger("service_registry")
 

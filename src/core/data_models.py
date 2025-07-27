@@ -5,10 +5,11 @@
 
 import os
 import platform
-from typing import Dict, Any, Optional, List, Union
-from pathlib import Path
-from pydantic import BaseModel, Field, validator
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field, validator
 
 
 class PlatformType(Enum):

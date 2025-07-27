@@ -5,34 +5,26 @@ LiteLLM统一接口服务
 """
 
 import asyncio
+import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Union
-import logging
+from typing import Any, Dict, List, Optional, Union
 
 try:
     import litellm
-    from litellm import completion, acompletion
+    from litellm import acompletion, completion
 
     LITELLM_AVAILABLE = True
 except ImportError:
     LITELLM_AVAILABLE = False
     litellm = None
 
-from .health_monitor import (
-    HealthChecker,
-    HealthCheckResult,
-    HealthStatus,
-    register_health_check,
-)
-from .service_registry import (
-    ServiceInfo,
-    ServiceType,
-    ServicePriority,
-    register_service,
-)
 from ..config.logging_config import get_logger
+from .health_monitor import (HealthChecker, HealthCheckResult, HealthStatus,
+                             register_health_check)
+from .service_registry import (ServiceInfo, ServicePriority, ServiceType,
+                               register_service)
 
 logger = get_logger("litellm_service")
 

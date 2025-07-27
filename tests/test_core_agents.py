@@ -3,24 +3,19 @@
 测试Coordinator、Planner、TestTeam、Tester、Coder和Executor智能体的基本功能。
 """
 
-import pytest
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
 
-from src.models.workspace import GlobalState, TaskMetadata
-from src.models.types import AgentType, TaskType
-from src.agents import (
-    create_coordinator_agent,
-    create_planner_agent,
-    create_test_team_router,
-    create_tester_agent,
-    create_coder_agent,
-    create_executor_agent,
-    get_agent_factory,
-    create_workflow,
-)
+import pytest
+
+from src.agents import (create_coder_agent, create_coordinator_agent,
+                        create_executor_agent, create_planner_agent,
+                        create_test_team_router, create_tester_agent,
+                        create_workflow, get_agent_factory)
 from src.core.base_agent import AgentInput
+from src.models.types import AgentType, TaskType
+from src.models.workspace import GlobalState, TaskMetadata
 
 
 class TestCoreAgents:

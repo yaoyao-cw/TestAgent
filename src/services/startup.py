@@ -8,9 +8,9 @@ import asyncio
 import logging
 from typing import Optional
 
-from .external_service_manager import get_external_service_manager
-from .config_loader import get_service_config_loader
 from ..config.logging_config import get_logger
+from .config_loader import get_service_config_loader
+from .external_service_manager import get_external_service_manager
 
 logger = get_logger("service_startup")
 

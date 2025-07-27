@@ -1,18 +1,19 @@
 """RAG服务集成测试"""
 
-import pytest
 import asyncio
-import tempfile
 import os
+import tempfile
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from src.rag.rag_service import RAGService, RAGServiceManager
-from src.rag.document_parser import DocumentParser
-from src.rag.text_splitter import TextSplitter, SemanticTextSplitter
-from src.rag.embedding_service import EmbeddingService
-from src.rag.vector_database import ChromaVectorDatabase
+import pytest
+
 from src.exceptions import RAGServiceException
+from src.rag.document_parser import DocumentParser
+from src.rag.embedding_service import EmbeddingService
+from src.rag.rag_service import RAGService, RAGServiceManager
+from src.rag.text_splitter import SemanticTextSplitter, TextSplitter
+from src.rag.vector_database import ChromaVectorDatabase
 
 
 class TestRAGServiceIntegration:

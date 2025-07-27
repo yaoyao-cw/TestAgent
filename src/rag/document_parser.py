@@ -1,10 +1,10 @@
 """文档解析器模块"""
 
-import os
-from typing import Dict, Any, Optional
-from pathlib import Path
 import asyncio
+import os
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 # 文档解析库
 try:
@@ -29,6 +29,7 @@ except ImportError:
     EXCEL_AVAILABLE = False
 
 import logging
+
 from ..exceptions import DocumentProcessingException
 from ..utils.file_utils import get_file_extension, is_supported_file
 

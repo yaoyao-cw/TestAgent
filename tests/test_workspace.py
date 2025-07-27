@@ -1,14 +1,15 @@
 """工作空间核心组件测试"""
 
-import pytest
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
 from datetime import datetime
+from pathlib import Path
 
-from src.core.workspace import TaskFileSystemManager, FileNamingManager
-from src.models.types import TaskType, AgentType
-from src.models.workspace import TaskStatus, FileType
+import pytest
+
+from src.core.workspace import FileNamingManager, TaskFileSystemManager
+from src.models.types import AgentType, TaskType
+from src.models.workspace import FileType, TaskStatus
 
 
 class TestFileNamingManager:

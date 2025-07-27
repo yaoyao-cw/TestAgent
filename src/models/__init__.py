@@ -1,18 +1,12 @@
 """数据模型模块"""
 
-from .types import TaskType, StepType, AgentType, LLMType
-from .state import TestAgentState, Resource
 from .execution import ExecutionPlan, ExecutionStep
-from .review import ReviewScore, TestCaseReview, TestScriptReview, RequirementReview
-from .workspace import (
-    TaskStatus,
-    FileType,
-    FileReference,
-    TaskMetadata,
-    WorkspaceState,
-    TaskRecoveryInfo,
-    GlobalState,
-)
+from .review import (RequirementReview, ReviewScore, TestCaseReview,
+                     TestScriptReview)
+from .state import Resource, TestAgentState
+from .types import AgentType, LLMType, StepType, TaskType
+from .workspace import (FileReference, FileType, GlobalState, TaskMetadata,
+                        TaskRecoveryInfo, TaskStatus, WorkspaceState)
 
 __all__ = [
     # 基础类型

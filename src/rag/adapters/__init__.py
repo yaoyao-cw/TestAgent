@@ -4,8 +4,8 @@
 """
 
 from .chromadb_adapter import ChromaDBAdapter
-from .ragflow_adapter import RAGFlowAdapter
-from .qanything_adapter import QAnythingAdapter
 from .custom_rag_adapter import CustomRAGAdapter
+from .qanything_adapter import QAnythingAdapter
+from .ragflow_adapter import RAGFlowAdapter
 
 __all__ = ["ChromaDBAdapter", "RAGFlowAdapter", "QAnythingAdapter", "CustomRAGAdapter"]

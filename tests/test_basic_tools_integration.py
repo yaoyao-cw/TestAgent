@@ -2,16 +2,16 @@
 """基础工具测试脚本"""
 
 import asyncio
-import sys
 import os
+import sys
 
 # 添加src目录到Python路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+from tools.decorators import get_tool_registry, tool
 from tools.python_repl import PythonREPL
-from tools.web_search import WebSearchTool
 from tools.tool_manager import get_tool_manager
-from tools.decorators import tool, get_tool_registry
+from tools.web_search import WebSearchTool
 
 
 def test_python_repl():

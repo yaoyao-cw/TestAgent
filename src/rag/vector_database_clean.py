@@ -5,8 +5,8 @@
 
 import os
 import uuid
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 # 向量数据库库
 try:
@@ -18,6 +18,7 @@ except ImportError:
     CHROMA_AVAILABLE = False
 
 import logging
+
 from ..exceptions import RAGServiceException
 from .text_splitter import TextChunk
 

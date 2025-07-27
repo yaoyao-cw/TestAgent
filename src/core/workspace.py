@@ -4,20 +4,17 @@
 文件引用模型和元数据管理，以及任务状态持久化机制。
 """
 
-import os
-import json
-import uuid
 import hashlib
+import json
+import os
+import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ..models.types import AgentType, TaskType
-from ..models.workspace import FileType, TaskStatus, FileReference, TaskMetadata
-from ..models.workspace import FileType, TaskStatus
-
-
-from ..models.workspace import FileReference, TaskMetadata
+from ..models.workspace import (FileReference, FileType, TaskMetadata,
+                                TaskStatus)
 
 
 class FileNamingManager:

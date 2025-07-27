@@ -1,17 +1,17 @@
 """LLM提供商模块"""
 
-from typing import Dict, List, Optional
 from dataclasses import dataclass
+from typing import Dict, List, Optional
 
-from .base import BaseLLMProvider, LLMMessage, LLMResponse
-from .openai_provider import OpenAIProvider
 from .anthropic_provider import AnthropicProvider
-from .deepseek_provider import DeepSeekProvider
-from .qwen_provider import QwenProvider
-from .kimi_provider import KimiProvider
-from .doubao_provider import DoubaoProvider
-from .zhipu_provider import ZhipuProvider
 from .baichuan_provider import BaichuanProvider
+from .base import BaseLLMProvider, LLMMessage, LLMResponse
+from .deepseek_provider import DeepSeekProvider
+from .doubao_provider import DoubaoProvider
+from .kimi_provider import KimiProvider
+from .openai_provider import OpenAIProvider
+from .qwen_provider import QwenProvider
+from .zhipu_provider import ZhipuProvider
 
 # 为了兼容性，创建LLMProvider别名
 LLMProvider = BaseLLMProvider

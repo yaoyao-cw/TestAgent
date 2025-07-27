@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
 """测试最终版本的Python REPL工具 - 包含所有扩展功能"""
 
-import sys
 import os
+import sys
 
 # 导入最终优化版本
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "tools"))
 
-from python_repl_optimized import (
-    python_repl_tool,
-    get_repl_info,
-    get_security_info,
-    get_performance_info,
-    execute_with_details,
-    execute_with_metrics,
-    batch_execute,
-    validate_code_safety,
-)
+from python_repl_optimized import (batch_execute, execute_with_details,
+                                   execute_with_metrics, get_performance_info,
+                                   get_repl_info, get_security_info,
+                                   python_repl_tool, validate_code_safety)
 
 
 def test_info_functions():

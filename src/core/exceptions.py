@@ -5,8 +5,8 @@ TestAgent异常处理模块
 定义系统中使用的所有自定义异常类型
 """
 
-from typing import Any, Dict, Optional, List
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class ErrorSeverity(Enum):

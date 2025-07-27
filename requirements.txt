@@ -54,7 +54,9 @@ click>=8.1.0
 
 # 安全
 cryptography>=41.0.0
-passlib>=1.7.4
+passlib[bcrypt]>=1.7.4
+PyJWT>=2.8.0
+bleach>=6.1.0
 
 # 时间处理
 python-dateutil>=2.8.0

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """快速测试优化版本的Python REPL工具"""
 
-import sys
 import os
+import sys
 
 # 导入优化版本
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "tools"))

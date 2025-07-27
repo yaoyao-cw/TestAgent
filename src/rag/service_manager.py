@@ -5,26 +5,17 @@
 
 import asyncio
 import time
-from typing import Dict, List, Optional, Any, Union
-from datetime import datetime, timedelta
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 from ..config.logging_config import get_logger
 from ..exceptions import RAGServiceException
-from .interfaces import (
-    RAGServiceInterface,
-    Document,
-    SearchResult,
-    ServiceHealthInfo,
-    RAGServiceStatus,
-)
-from .adapters import (
-    ChromaDBAdapter,
-    RAGFlowAdapter,
-    QAnythingAdapter,
-    CustomRAGAdapter,
-)
+from .adapters import (ChromaDBAdapter, CustomRAGAdapter, QAnythingAdapter,
+                       RAGFlowAdapter)
+from .interfaces import (Document, RAGServiceInterface, RAGServiceStatus,
+                         SearchResult, ServiceHealthInfo)
 
 logger = get_logger("rag_service_manager")
 

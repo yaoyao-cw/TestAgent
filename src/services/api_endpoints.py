@@ -4,13 +4,15 @@
 提供外部服务状态和管理的API接口。
 """
 
-from typing import Dict, Any, List, Optional
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from .external_service_manager import get_external_service_manager, ServiceStatus
-from .config_loader import get_service_config_loader
 from ..config.logging_config import get_logger
+from .config_loader import get_service_config_loader
+from .external_service_manager import (ServiceStatus,
+                                       get_external_service_manager)
 
 logger = get_logger("service_api")
 

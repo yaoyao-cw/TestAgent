@@ -3,23 +3,24 @@
 人机协作功能集成测试
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, Mock, patch
 
-from src.collaboration.plan_reviewer import PlanReviewer, ReviewFeedback, ReviewStatus
+import pytest
+
+from src.collaboration.auto_accept_manager import (AutoAcceptCondition,
+                                                   AutoAcceptManager,
+                                                   AutoAcceptMode)
+from src.collaboration.content_optimizer import (ContentOptimizer,
+                                                 OptimizationSuggestion)
 from src.collaboration.feedback_processor import FeedbackProcessor
-from src.collaboration.auto_accept_manager import (
-    AutoAcceptManager,
-    AutoAcceptMode,
-    AutoAcceptCondition,
-)
-from src.collaboration.report_editor import ReportEditor, EditOperation
-from src.collaboration.content_optimizer import ContentOptimizer, OptimizationSuggestion
-from src.models.execution import ExecutionPlan, ExecutionStep
-from src.models.types import TaskType, StepType
+from src.collaboration.plan_reviewer import (PlanReviewer, ReviewFeedback,
+                                             ReviewStatus)
+from src.collaboration.report_editor import EditOperation, ReportEditor
 from src.exceptions import TestAgentException
+from src.models.execution import ExecutionPlan, ExecutionStep
+from src.models.types import StepType, TaskType
 
 
 class TestPlanReviewer:

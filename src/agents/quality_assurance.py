@@ -6,18 +6,14 @@
 
 import json
 import re
-from typing import Dict, Any, List, Optional, Union, Tuple
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ..models.review import (
-    ReviewScore,
-    TestCaseReview,
-    TestScriptReview,
-    RequirementReview,
-)
 from ..config.logging_config import get_logger
+from ..models.review import (RequirementReview, ReviewScore, TestCaseReview,
+                             TestScriptReview)
 
 logger = get_logger("quality_assurance")
 

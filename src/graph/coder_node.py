@@ -4,18 +4,19 @@
 负责生成测试脚本、自动化代码和代码质量检查
 """
 
-import re
 import ast
 import json
 import logging
-from typing import Dict, Any, List, Optional, Tuple
-from langchain_core.messages import HumanMessage, AIMessage
+import re
+from typing import Any, Dict, List, Optional, Tuple
 
-from ..models.state import TestAgentState
-from ..models.execution import ExecutionStep, StepType
-from ..llm.service import LLMService
-from ..tools.tool_manager import get_tool_manager
+from langchain_core.messages import AIMessage, HumanMessage
+
 from ..exceptions import TestAgentException
+from ..llm.service import LLMService
+from ..models.execution import ExecutionStep, StepType
+from ..models.state import TestAgentState
+from ..tools.tool_manager import get_tool_manager
 
 logger = logging.getLogger(__name__)
 

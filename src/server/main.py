@@ -3,36 +3,33 @@
 TestAgent Web API服务主应用
 """
 
-import os
 import logging
+import os
 from contextlib import asynccontextmanager
-from typing import Dict, Any
 from datetime import datetime
+from typing import Any, Dict
 
-from fastapi import FastAPI, Request, HTTPException
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-import uvicorn
 
-from .routers import (
-    tasks,
-    documents,
-    system,
-    collaboration,
-    websocket,
-    config,
-    monitoring,
-    cache,
-)
-from .middleware import RateLimitMiddleware, LoggingMiddleware, SecurityMiddleware
-from ..config.settings import get_settings
-from ..config.logging_config import get_logger
-from ..core.exceptions import TestAgentException
-from ..core import initialize_core_systems, shutdown_core_systems
 from ..cache import initialize_cache_system, shutdown_cache_system
-from ..performance import initialize_performance_system, shutdown_performance_system
+from ..config.logging_config import get_logger
+from ..config.settings import get_settings
+from ..core import initialize_core_systems, shutdown_core_systems
+from ..core.exceptions import TestAgentException
+from ..performance import (initialize_performance_system,
+                           shutdown_performance_system)
+from ..security.security_manager import (initialize_security_system,
+                                         shutdown_security_system)
+from .middleware import (AuthenticationMiddleware, InputValidationMiddleware,
+                         LoggingMiddleware, RateLimitMiddleware,
+                         SecurityMiddleware)
+from .routers import (auth, cache, collaboration, config, documents,
+                      monitoring, security, system, tasks, websocket)
 
 logger = get_logger("api_server")
 
@@ -54,6 +51,10 @@ async def lifespan(app: FastAPI):
     # 初始化性能优化系统
     if not initialize_performance_system():
         logger.error("性能优化系统初始化失败")
+
+    # 初始化安全系统
+    if not initialize_security_system():
+        logger.error("安全系统初始化失败")
 
     # 初始化工具管理器
     try:
@@ -93,6 +94,9 @@ async def lifespan(app: FastAPI):
         logger.info("MCP管理器关闭成功")
     except Exception as e:
         logger.warning(f"MCP管理器关闭失败: {e}")
+
+    # 关闭安全系统
+    shutdown_security_system()
 
     # 关闭性能优化系统
     shutdown_performance_system()
@@ -149,15 +153,20 @@ def setup_middleware(app: FastAPI, settings):
     if not settings.debug:
         app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
 
-    # 自定义中间件
+    # 自定义中间件（注意顺序很重要）
     app.add_middleware(SecurityMiddleware)
+    app.add_middleware(InputValidationMiddleware)
+    app.add_middleware(AuthenticationMiddleware)
     app.add_middleware(RateLimitMiddleware)
     app.add_middleware(LoggingMiddleware)
 
 
 def setup_routers(app: FastAPI):
     """配置路由"""
-    # API路由
+    # 认证路由（公开）
+    app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
+
+    # API路由（需要认证）
     app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
 
     app.include_router(documents.router, prefix="/api/v1/documents", tags=["documents"])
@@ -178,6 +187,9 @@ def setup_routers(app: FastAPI):
 
     # 缓存管理路由
     app.include_router(cache.router, prefix="/api/v1/cache", tags=["cache"])
+
+    # 安全管理路由
+    app.include_router(security.router, prefix="/api/v1/security", tags=["security"])
 
     # WebSocket路由
     app.include_router(websocket.router, prefix="/ws", tags=["websocket"])

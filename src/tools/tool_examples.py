@@ -1,14 +1,14 @@
 """工具使用示例"""
 
 import asyncio
-from typing import Dict, Any
+from typing import Any, Dict
 
+from ..config.logging_config import get_logger
+from ..rag import RAGService
+from .decorators import cache_result, rate_limit, tool, validate_input
+from .document_retrieval import DocumentRetrievalTool
 from .python_repl import PythonREPL
 from .web_search import WebSearchTool
-from .document_retrieval import DocumentRetrievalTool
-from .decorators import tool, rate_limit, validate_input, cache_result
-from ..rag import RAGService
-from ..config.logging_config import get_logger
 
 logger = get_logger("tool_examples")
 

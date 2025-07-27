@@ -3,14 +3,16 @@
 测试E2B沙盒的各种功能，包括代码执行、脚本执行、pytest测试等。
 """
 
-import pytest
 import asyncio
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from src.tools.e2b_sandbox import E2BSandboxExecutor, E2B_AVAILABLE
+import pytest
+
+from src.tools.e2b_sandbox import E2B_AVAILABLE, E2BSandboxExecutor
 from src.tools.fallback_sandbox import FallbackSandboxExecutor
-from src.tools.unified_sandbox import UnifiedSandboxExecutor, execute_code_safely
+from src.tools.unified_sandbox import (UnifiedSandboxExecutor,
+                                       execute_code_safely)
 
 
 class TestE2BSandboxExecutor:

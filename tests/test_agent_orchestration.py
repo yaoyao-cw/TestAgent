@@ -1,16 +1,12 @@
 """智能体编排基础测试"""
 
-import pytest
 from unittest.mock import Mock
 
-from src.core.base_agent import (
-    BaseAgent,
-    SimpleAgent,
-    ReActAgent,
-    AgentInput,
-    AgentOutput,
-)
-from src.core.agent_router import AgentRouter, RoutingRule, Message
+import pytest
+
+from src.core.agent_router import AgentRouter, Message, RoutingRule
+from src.core.base_agent import (AgentInput, AgentOutput, BaseAgent,
+                                 ReActAgent, SimpleAgent)
 from src.models.types import AgentType
 from src.models.workspace import GlobalState, WorkspaceState
 

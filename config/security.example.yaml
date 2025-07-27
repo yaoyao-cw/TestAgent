@@ -1,0 +1,172 @@
+# 安全配置示例文件
+# 复制为 security.yaml 并根据需要修改
+
+# JWT认证配置
+jwt:
+  secret_key: "your-secret-key-here"  # 生产环境中应该使用强密钥
+  algorithm: "HS256"
+  access_token_expire_minutes: 30
+  refresh_token_expire_days: 7
+  max_failed_attempts: 5
+  lockout_duration_minutes: 15
+
+# 速率限制配置
+rate_limiting:
+  global:
+    requests_per_minute: 100
+    burst_capacity: 20
+  
+  per_ip:
+    requests_per_minute: 60
+    burst_capacity: 10
+  
+  per_user:
+    requests_per_minute: 120
+    burst_capacity: 30
+  
+  endpoints:
+    "/api/v1/tasks":
+      requests_per_minute: 30
+      burst_capacity: 5
+    
+    "/api/v1/documents/upload":
+      requests_per_minute: 10
+      burst_capacity: 2
+    
+    "/api/v1/system/execute":
+      requests_per_minute: 20
+      burst_capacity: 3
+
+# 沙盒安全配置
+sandbox_security:
+  resource_limits:
+    cpu_percent: 80.0
+    memory_mb: 512
+    disk_mb: 100
+    execution_time_seconds: 60
+    network_enabled: false
+    max_processes: 5
+    max_threads: 10
+    max_file_descriptors: 100
+  
+  monitoring:
+    enabled: true
+    interval_seconds: 1.0
+    history_size: 1000
+  
+  circuit_breaker:
+    failure_threshold: 5
+    timeout_seconds: 300
+
+# 输入验证配置
+input_validation:
+  max_string_length: 10000
+  max_json_size: 1048576  # 1MB
+  max_json_depth: 10
+  max_file_size: 10485760  # 10MB
+  
+  allowed_file_extensions:
+    - "txt"
+    - "md"
+    - "json"
+    - "yaml"
+    - "yml"
+    - "csv"
+    - "pdf"
+    - "docx"
+    - "xlsx"
+  
+  injection_detection:
+    enabled: true
+    strict_mode: false
+
+# 数据加密配置
+encryption:
+  level: "standard"  # none, basic, standard, high
+  key_derivation_iterations: 100000
+  salt_length: 32
+  key_length: 32
+  
+  sensitive_fields:
+    - "password"
+    - "secret"
+    - "token"
+    - "key"
+    - "email"
+    - "phone"
+    - "ssn"
+    - "credit_card"
+
+# 审计日志配置
+audit_logging:
+  enabled: true
+  log_directory: "logs/security"
+  max_recent_events: 1000
+  
+  retention:
+    audit_log_days: 90
+    compliance_log_days: 365
+    threat_log_days: 180
+  
+  compliance_tags:
+    - "gdpr"
+    - "hipaa"
+    - "sox"
+    - "pci_dss"
+
+# 恶意代码检测配置
+malicious_code_detection:
+  enabled: true
+  max_threat_level: "medium"  # low, medium, high, critical
+  
+  custom_patterns:
+    # 可以添加自定义的危险模式
+    - pattern: "eval\\s*\\("
+      level: "critical"
+      description: "动态代码执行"
+  
+  allowed_imports:
+    # 额外允许的模块
+    - "custom_module"
+  
+  blocked_imports:
+    # 额外阻止的模块
+    - "dangerous_module"
+
+# IP黑白名单
+ip_filtering:
+  whitelist:
+    - "127.0.0.1"
+    - "::1"
+    # - "192.168.1.0/24"  # 可以使用CIDR格式
+  
+  blacklist:
+    # - "192.168.1.100"
+  
+  auto_blacklist:
+    enabled: true
+    threshold_requests: 100  # 10分钟内请求数阈值
+    threshold_failures: 20   # 10分钟内失败数阈值
+
+# 会话管理
+session_management:
+  max_concurrent_sessions: 5
+  session_timeout_minutes: 60
+  cleanup_interval_minutes: 15
+
+# 安全头配置
+security_headers:
+  x_content_type_options: "nosniff"
+  x_frame_options: "DENY"
+  x_xss_protection: "1; mode=block"
+  strict_transport_security: "max-age=31536000; includeSubDomains"
+  referrer_policy: "strict-origin-when-cross-origin"
+  content_security_policy: "default-src 'self'"
+
+# 开发模式配置
+development:
+  disable_rate_limiting: false
+  disable_input_validation: false
+  disable_malicious_code_detection: false
+  enable_debug_logging: true
+  mock_authentication: false

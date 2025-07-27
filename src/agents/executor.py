@@ -5,23 +5,24 @@
 建立资源限制和超时控制机制。
 """
 
-import json
 import asyncio
+import json
+import os
 import subprocess
 import tempfile
-import os
-from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-from ..core.base_agent import BaseAgent, AgentInput, AgentOutput
-from ..models.types import AgentType, TaskType
-from ..models.workspace import GlobalState, FileType
+from ..config.logging_config import get_logger
+from ..core.base_agent import AgentInput, AgentOutput, BaseAgent
 from ..core.workspace import workspace_manager
 from ..llm.service import get_llm_service
+from ..models.types import AgentType, TaskType
+from ..models.workspace import FileType, GlobalState
 from ..tools.python_repl_final import PythonREPLTool
-from ..tools.unified_sandbox import UnifiedSandboxExecutor, SandboxExecutionResult
-from ..config.logging_config import get_logger
+from ..tools.unified_sandbox import (SandboxExecutionResult,
+                                     UnifiedSandboxExecutor)
 
 logger = get_logger("executor_agent")
 

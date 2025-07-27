@@ -1,20 +1,19 @@
 """RAG知识库服务主接口"""
 
-import os
 import asyncio
-from typing import List, Dict, Any, Optional, Union
-from pathlib import Path
+import os
 from dataclasses import asdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 from ..config.logging_config import get_logger
 from ..config.settings import get_settings
 from ..exceptions import RAGServiceException
 from ..utils.performance import async_monitor_performance
-
 from .document_parser import DocumentParser
-from .text_splitter import TextSplitter, SemanticTextSplitter, TextChunk
 from .embedding_service import EmbeddingService
-from .vector_database import VectorDatabase, ChromaVectorDatabase, SearchResult
+from .text_splitter import SemanticTextSplitter, TextChunk, TextSplitter
+from .vector_database import ChromaVectorDatabase, SearchResult, VectorDatabase
 
 logger = get_logger("rag_service")
 

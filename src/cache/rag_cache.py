@@ -5,13 +5,13 @@ RAG检索结果缓存系统
 缓存文档检索和向量化结果，提高RAG系统性能
 """
 
-import json
 import hashlib
+import json
 import logging
-from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
-from .cache_manager import get_cache_manager, cache
+from .cache_manager import cache, get_cache_manager
 
 logger = logging.getLogger("rag_cache")
 

@@ -5,11 +5,12 @@ FastAPI集成示例
 """
 
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-from .startup import initialize_external_services, shutdown_external_services
-from .api_endpoints import router as services_router
 from ..config.logging_config import get_logger
+from .api_endpoints import router as services_router
+from .startup import initialize_external_services, shutdown_external_services
 
 logger = get_logger("fastapi_integration")
 

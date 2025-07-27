@@ -3,26 +3,23 @@
 缓存和性能优化系统测试
 """
 
-import pytest
 import asyncio
+import sys
 import time
+from pathlib import Path
 from unittest.mock import Mock, patch
 
-import sys
-from pathlib import Path
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.cache.cache_manager import MemoryCache, CacheManager, CacheEntry, cache
+from src.cache.cache_manager import (CacheEntry, CacheManager, MemoryCache,
+                                     cache)
 from src.cache.llm_cache import LLMCache
 from src.cache.rag_cache import RAGCache
-from src.performance.optimizer import (
-    PerformanceOptimizer,
-    PerformanceConfig,
-    ResourceMonitor,
-    ConcurrencyManager,
-    MemoryManager,
-)
+from src.performance.optimizer import (ConcurrencyManager, MemoryManager,
+                                       PerformanceConfig, PerformanceOptimizer,
+                                       ResourceMonitor)
 
 
 class TestMemoryCache:

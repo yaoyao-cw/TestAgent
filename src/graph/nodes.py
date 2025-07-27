@@ -4,17 +4,18 @@ TestAgent 图节点实现
 包含协调器、规划器、研究团队、报告员和评审员等核心节点
 """
 
-import re
 import json
 import logging
-from typing import Dict, Any, List, Optional
-from langchain_core.messages import HumanMessage, AIMessage
+import re
+from typing import Any, Dict, List, Optional
 
-from ..models.state import TestAgentState, TaskType
-from ..models.execution import ExecutionPlan, ExecutionStep, StepType
+from langchain_core.messages import AIMessage, HumanMessage
+
+from ..exceptions import PlanningException, TestAgentException
 from ..llm.service import LLMService
+from ..models.execution import ExecutionPlan, ExecutionStep, StepType
+from ..models.state import TaskType, TestAgentState
 from ..tools.tool_manager import get_tool_manager
-from ..exceptions import TestAgentException, PlanningException
 
 logger = logging.getLogger(__name__)
 

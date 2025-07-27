@@ -4,17 +4,17 @@
 负责生成测试报告、汇总观察结果和格式化输出
 """
 
-import re
 import json
 import logging
-from typing import Dict, Any, List, Optional
+import re
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from ..models.state import TestAgentState
-from ..models.execution import ExecutionStep, StepType
-from ..models.types import TaskType
-from ..llm.service import LLMService
 from ..exceptions import TestAgentException
+from ..llm.service import LLMService
+from ..models.execution import ExecutionStep, StepType
+from ..models.state import TestAgentState
+from ..models.types import TaskType
 
 logger = logging.getLogger(__name__)
 

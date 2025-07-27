@@ -1,19 +1,15 @@
 """LLM提供商支持测试"""
 
-import pytest
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from src.llm.providers import (
-    LLMProvider,
-    ModelInfo,
-    get_model_info,
-    get_models_by_provider,
-    get_recommended_models,
-    validate_model_config,
-)
-from src.llm.factory import LLMFactory
+import pytest
+
 from src.llm.config import LLMConfig
+from src.llm.factory import LLMFactory
+from src.llm.providers import (LLMProvider, ModelInfo, get_model_info,
+                               get_models_by_provider, get_recommended_models,
+                               validate_model_config)
 from src.models.types import LLMType
 
 

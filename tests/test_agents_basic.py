@@ -3,16 +3,17 @@
 测试智能体的基本创建和配置功能，避免复杂的LLM依赖。
 """
 
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 # 添加项目根目录到Python路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.models.workspace import GlobalState
-from src.models.types import AgentType, TaskType
 from src.core.base_agent import AgentInput
+from src.models.types import AgentType, TaskType
+from src.models.workspace import GlobalState
 
 
 class TestBasicAgents:

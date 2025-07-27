@@ -1,12 +1,12 @@
 """优化的Python REPL工具 - 结合deer-flow简洁性和我们的安全性"""
 
-import sys
-import io
 import ast
-import time
+import io
 import logging
-from typing import Dict, Any, Optional, Tuple, Annotated, List
+import sys
+import time
 from functools import wraps
+from typing import Annotated, Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +100,13 @@ class OptimizedPythonREPL:
         # 预加载安全模块
         safe_modules = {}
         try:
-            import math, random, datetime, json, re, collections, itertools
+            import collections
+            import datetime
+            import itertools
+            import json
+            import math
+            import random
+            import re
 
             safe_modules.update(
                 {
@@ -497,8 +503,8 @@ def execute_with_metrics(code: str) -> Dict[str, Any]:
     Returns:
         包含性能指标的详细执行结果
     """
-    import time
     import sys
+    import time
 
     start_time = time.time()
 

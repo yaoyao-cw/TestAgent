@@ -5,24 +5,22 @@
 """
 
 import asyncio
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Callable, Union
-import logging
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from .health_monitor import ServiceHealthMonitor, HealthStatus, get_health_monitor
-from .service_registry import (
-    ServiceRegistry,
-    ServiceType,
-    ServicePriority,
-    get_service_registry,
-)
-from .litellm_service import LiteLLMService, LiteLLMConfig, initialize_litellm_service
-from .redis_service import RedisService, RedisConfig, initialize_redis_service
-from .config_loader import get_service_config_loader
 from ..config.logging_config import get_logger
 from ..config.settings import get_settings
+from .config_loader import get_service_config_loader
+from .health_monitor import (HealthStatus, ServiceHealthMonitor,
+                             get_health_monitor)
+from .litellm_service import (LiteLLMConfig, LiteLLMService,
+                              initialize_litellm_service)
+from .redis_service import RedisConfig, RedisService, initialize_redis_service
+from .service_registry import (ServicePriority, ServiceRegistry, ServiceType,
+                               get_service_registry)
 
 logger = get_logger("external_service_manager")
 

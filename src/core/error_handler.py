@@ -5,23 +5,16 @@
 提供统一的错误处理、记录和恢复机制
 """
 
+import logging
 import sys
 import traceback
-import logging
-from typing import Any, Dict, Optional, Callable, Type, Union
-from functools import wraps
 from contextlib import contextmanager
+from functools import wraps
+from typing import Any, Callable, Dict, Optional, Type, Union
 
-from .exceptions import (
-    TestAgentException,
-    ErrorSeverity,
-    ErrorCategory,
-    ConfigurationError,
-    NetworkError,
-    ProcessingError,
-    TimeoutError,
-    ResourceError,
-)
+from .exceptions import (ConfigurationError, ErrorCategory, ErrorSeverity,
+                         NetworkError, ProcessingError, ResourceError,
+                         TestAgentException, TimeoutError)
 
 logger = logging.getLogger("error_handler")
 

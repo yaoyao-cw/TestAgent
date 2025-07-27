@@ -5,29 +5,24 @@
 测试错误恢复管理器和智能体行为优化器的功能
 """
 
-import pytest
 import asyncio
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
-from src.core.error_recovery_manager import (
-    ErrorRecoveryManager,
-    ErrorContext,
-    ErrorType,
-    ContextPreservationLevel,
-    RecoveryPlan,
-    get_error_recovery_manager,
-    reset_error_recovery_manager,
-)
-from src.core.agent_behavior_optimizer import (
-    AgentBehaviorOptimizer,
-    AttentionGuide,
-    ContextDiversityInjection,
-    BehaviorPattern,
-    get_behavior_optimizer,
-    reset_behavior_optimizer,
-)
-from src.core.exceptions import NetworkError, LLMError, TimeoutError
+import pytest
+
+from src.core.agent_behavior_optimizer import (AgentBehaviorOptimizer,
+                                               AttentionGuide, BehaviorPattern,
+                                               ContextDiversityInjection,
+                                               get_behavior_optimizer,
+                                               reset_behavior_optimizer)
+from src.core.error_recovery_manager import (ContextPreservationLevel,
+                                             ErrorContext,
+                                             ErrorRecoveryManager, ErrorType,
+                                             RecoveryPlan,
+                                             get_error_recovery_manager,
+                                             reset_error_recovery_manager)
+from src.core.exceptions import LLMError, NetworkError, TimeoutError
 from src.models.workspace import GlobalState
 
 

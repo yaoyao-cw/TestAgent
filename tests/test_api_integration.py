@@ -3,14 +3,15 @@
 API集成测试
 """
 
-import pytest
 import asyncio
 import json
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 
-from src.server.main import app
 from src.client.testagent_client import TestAgentClient, TestAgentSyncClient
+from src.server.main import app
 
 
 @pytest.fixture

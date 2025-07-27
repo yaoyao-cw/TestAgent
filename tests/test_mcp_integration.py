@@ -3,19 +3,21 @@
 MCP集成单元测试
 """
 
-import pytest
 import asyncio
 import json
 import tempfile
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-from src.mcp.config import MCPConfig, MCPServerConfig, load_mcp_config, save_mcp_config
-from src.mcp.client import MCPClient, create_mcp_client
-from src.mcp.sse_client import MCPSSEClient
-from src.mcp.server_manager import MCPServerManager
-from src.mcp.tool_adapter import MCPToolAdapter
+import pytest
+
 from src.exceptions import MCPIntegrationException
+from src.mcp.client import MCPClient, create_mcp_client
+from src.mcp.config import (MCPConfig, MCPServerConfig, load_mcp_config,
+                            save_mcp_config)
+from src.mcp.server_manager import MCPServerManager
+from src.mcp.sse_client import MCPSSEClient
+from src.mcp.tool_adapter import MCPToolAdapter
 
 
 class TestMCPConfig:

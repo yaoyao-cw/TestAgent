@@ -4,9 +4,10 @@
 提供向量存储的统一接口
 """
 
-from typing import List, Dict, Any, Optional
-from .vector_database_clean import ChromaVectorDatabase
 import logging
+from typing import Any, Dict, List, Optional
+
+from .vector_database_clean import ChromaVectorDatabase
 
 logger = logging.getLogger("vector_store")
 

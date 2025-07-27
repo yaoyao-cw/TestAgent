@@ -1,11 +1,12 @@
 """网络搜索工具模块"""
 
 import asyncio
-import aiohttp
 import json
-from typing import Dict, Any, List, Optional
-from urllib.parse import quote_plus, urljoin
 import re
+from typing import Any, Dict, List, Optional
+from urllib.parse import quote_plus, urljoin
+
+import aiohttp
 from bs4 import BeautifulSoup
 
 from ..config.logging_config import get_logger

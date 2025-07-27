@@ -1,12 +1,12 @@
 """简化的Python REPL工具 - 基于deer-flow设计"""
 
-import sys
-import io
 import ast
-import time
+import io
 import logging
-from typing import Dict, Any, Optional, Tuple, Annotated
+import sys
+import time
 from functools import wraps
+from typing import Annotated, Any, Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -108,10 +108,10 @@ class SimplePythonREPL:
         # 安全模块
         safe_modules = {}
         try:
-            import math
-            import random
             import datetime
             import json
+            import math
+            import random
             import re
 
             safe_modules.update(

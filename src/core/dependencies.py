@@ -4,13 +4,13 @@
 """
 
 import os
-import sys
 import subprocess
-from pathlib import Path
-from typing import List, Dict, Optional, Tuple
+import sys
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
-from .data_models import get_global_config, create_cross_platform_command
+from .data_models import create_cross_platform_command, get_global_config
 
 
 @dataclass

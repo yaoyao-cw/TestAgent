@@ -3,18 +3,18 @@
 缓存管理API路由
 """
 
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query, Body
+from fastapi import APIRouter, Body, HTTPException, Query
 from pydantic import BaseModel, Field
 
 try:
     from ...cache.cache_manager import get_cache_manager
     from ...cache.llm_cache import get_llm_cache
     from ...cache.rag_cache import get_rag_cache
-    from ...performance.optimizer import get_performance_optimizer
     from ...config.logging_config import get_logger
+    from ...performance.optimizer import get_performance_optimizer
 except ImportError as e:
     # 如果导入失败，提供模拟实现
     def get_cache_manager():

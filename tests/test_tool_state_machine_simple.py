@@ -4,19 +4,15 @@
 不依赖完整的配置系统
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-# 直接导入需要测试的模块
-from src.tools.state_machine import (
-    ToolStateMachine,
-    AgentState,
-    ToolCallMode,
-    ToolDefinition,
-)
 from src.tools.constraint_decoder import ConstraintDecoder
+# 直接导入需要测试的模块
+from src.tools.state_machine import (AgentState, ToolCallMode, ToolDefinition,
+                                     ToolStateMachine)
 
 
 def test_tool_state_machine_basic():

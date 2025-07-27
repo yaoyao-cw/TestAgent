@@ -4,9 +4,9 @@
 """
 
 import logging
-from typing import Dict, Any, List, Optional, Callable, Tuple
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ..config.logging_config import get_logger
 from ..exceptions import TestAgentException
