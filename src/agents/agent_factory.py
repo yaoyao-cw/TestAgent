@@ -73,7 +73,21 @@ class AgentFactory:
         try:
             # 标准化智能体类型
             if isinstance(agent_type, str):
-                agent_key = agent_type.lower()
+                # 字符串到AgentType的映射
+                string_to_agent_type = {
+                    "coordinator": AgentType.COORDINATOR,
+                    "planner": AgentType.PLANNER,
+                    "tester": AgentType.TESTER,
+                    "coder": AgentType.CODER,
+                    "executor": AgentType.EXECUTOR,
+                    "reviewer": AgentType.REVIEWER,
+                    "reporter": AgentType.REPORTER,
+                }
+                agent_key_str = agent_type.lower()
+                if agent_key_str in string_to_agent_type:
+                    agent_key = string_to_agent_type[agent_key_str]
+                else:
+                    agent_key = agent_key_str  # 保持原字符串用于特殊情况
             else:
                 agent_key = agent_type
 
