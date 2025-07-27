@@ -22,17 +22,16 @@ from .optimizer import (
     run_concurrent_tasks,
     run_with_timeout,
     optimize_memory,
-    get_performance_stats
+    get_performance_stats,
 )
 
 __all__ = [
     # Core Classes
     "PerformanceConfig",
     "ResourceMonitor",
-    "ConcurrencyManager", 
+    "ConcurrencyManager",
     "MemoryManager",
     "PerformanceOptimizer",
-    
     # Functions
     "get_performance_optimizer",
     "optimize_performance",
@@ -41,23 +40,24 @@ __all__ = [
     "run_concurrent_tasks",
     "run_with_timeout",
     "optimize_memory",
-    "get_performance_stats"
+    "get_performance_stats",
 ]
 
 
 def initialize_performance_system():
     """初始化性能优化系统"""
     import logging
+
     logger = logging.getLogger("performance_init")
-    
+
     try:
         # 初始化性能优化器
         optimizer = get_performance_optimizer()
         logger.info("Performance optimizer initialized")
-        
+
         logger.info("Performance optimization system initialized successfully")
         return True
-        
+
     except Exception as e:
         logger.error(f"Failed to initialize performance system: {e}")
         return False
@@ -66,16 +66,17 @@ def initialize_performance_system():
 def shutdown_performance_system():
     """关闭性能优化系统"""
     import logging
+
     logger = logging.getLogger("performance_shutdown")
-    
+
     try:
         # 关闭性能优化器
         optimizer = get_performance_optimizer()
         if optimizer:
             optimizer.shutdown()
-        
+
         logger.info("Performance optimization system shutdown completed")
-        
+
     except Exception as e:
         logger.error(f"Error during performance system shutdown: {e}")
 

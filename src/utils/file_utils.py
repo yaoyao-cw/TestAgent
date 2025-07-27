@@ -16,11 +16,22 @@ def get_file_extension(file_path: str) -> str:
 def is_supported_file(file_path: str) -> bool:
     """检查文件是否支持"""
     supported_extensions = {
-        '.txt', '.md', '.pdf', '.docx', '.doc', 
-        '.xlsx', '.xls', '.py', '.js', '.html', 
-        '.css', '.json', '.xml', '.csv'
+        ".txt",
+        ".md",
+        ".pdf",
+        ".docx",
+        ".doc",
+        ".xlsx",
+        ".xls",
+        ".py",
+        ".js",
+        ".html",
+        ".css",
+        ".json",
+        ".xml",
+        ".csv",
     }
-    
+
     extension = get_file_extension(file_path)
     return extension in supported_extensions
 
@@ -43,11 +54,11 @@ def list_files_in_directory(directory: str, extensions: List[str] = None) -> Lis
     directory_path = Path(directory)
     if not directory_path.exists():
         return []
-    
+
     files = []
     for file_path in directory_path.iterdir():
         if file_path.is_file():
             if extensions is None or get_file_extension(str(file_path)) in extensions:
                 files.append(str(file_path))
-    
+
     return files

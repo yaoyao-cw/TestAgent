@@ -19,7 +19,7 @@ app = FastAPI(
     description="TestAgent智能测试代理系统API",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 # 配置CORS
@@ -31,6 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # 根路径
 @app.get("/")
 async def root():
@@ -40,8 +41,9 @@ async def root():
         "version": "1.0.0",
         "description": "TestAgent智能测试代理系统API",
         "docs_url": "/docs",
-        "status": "running"
+        "status": "running",
     }
+
 
 @app.get("/health")
 async def health_check():
@@ -50,8 +52,9 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0",
-        "message": "TestAgent API is running"
+        "message": "TestAgent API is running",
     }
+
 
 # 简化的任务API
 @app.post("/api/v1/tasks/submit")
@@ -61,8 +64,9 @@ async def submit_task(request: Dict[str, Any]):
         "task_id": f"task_{int(datetime.now().timestamp())}",
         "status": "submitted",
         "message": "任务已提交（演示模式）",
-        "created_at": datetime.now().isoformat()
+        "created_at": datetime.now().isoformat(),
     }
+
 
 @app.get("/api/v1/tasks/{task_id}/status")
 async def get_task_status(task_id: str):
@@ -73,8 +77,9 @@ async def get_task_status(task_id: str):
         "progress": 100.0,
         "created_at": datetime.now().isoformat(),
         "updated_at": datetime.now().isoformat(),
-        "message": "任务已完成（演示模式）"
+        "message": "任务已完成（演示模式）",
     }
+
 
 @app.get("/api/v1/tasks")
 async def list_tasks():
@@ -86,13 +91,14 @@ async def list_tasks():
                 "status": "completed",
                 "task_type": "test_case_generation",
                 "task_topic": "演示任务",
-                "created_at": datetime.now().isoformat()
+                "created_at": datetime.now().isoformat(),
             }
         ],
         "total": 1,
         "page": 1,
-        "page_size": 10
+        "page_size": 10,
     }
+
 
 # 简化的系统API
 @app.get("/api/v1/system/status")
@@ -103,25 +109,22 @@ async def get_system_status():
             "status": "healthy",
             "version": "1.0.0",
             "uptime": 3600,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         },
         "components": [
             {
                 "name": "api_server",
                 "status": "healthy",
                 "healthy": True,
-                "last_check": datetime.now().isoformat()
+                "last_check": datetime.now().isoformat(),
             }
         ],
         "resources": {
             "cpu_usage": 25.0,
             "memory_usage": 45.0,
             "disk_usage": 60.0,
-            "network_io": {
-                "bytes_sent": 1024000,
-                "bytes_recv": 2048000
-            },
-            "process_count": 50
+            "network_io": {"bytes_sent": 1024000, "bytes_recv": 2048000},
+            "process_count": 50,
         },
         "execution_stats": {
             "total_tasks": 10,
@@ -129,9 +132,10 @@ async def get_system_status():
             "failed_tasks": 1,
             "pending_tasks": 1,
             "running_tasks": 0,
-            "average_execution_time": 120.5
-        }
+            "average_execution_time": 120.5,
+        },
     }
+
 
 # 异常处理
 @app.exception_handler(Exception)
@@ -142,22 +146,24 @@ async def general_exception_handler(request, exc: Exception):
         content={
             "error": str(exc),
             "type": exc.__class__.__name__,
-            "timestamp": datetime.now().isoformat()
-        }
+            "timestamp": datetime.now().isoformat(),
+        },
     )
+
 
 def start_server(host: str = "0.0.0.0", port: int = 8000, reload: bool = True):
     """启动API服务器"""
     print(f"🚀 启动TestAgent API服务器: http://{host}:{port}")
     print(f"📚 API文档: http://{host}:{port}/docs")
-    
+
     uvicorn.run(
         "src.server.main_simple:app",
         host=host,
         port=port,
         reload=reload,
-        log_level="info"
+        log_level="info",
     )
+
 
 if __name__ == "__main__":
     start_server()

@@ -8,9 +8,4 @@ from .ragflow_adapter import RAGFlowAdapter
 from .qanything_adapter import QAnythingAdapter
 from .custom_rag_adapter import CustomRAGAdapter
 
-__all__ = [
-    "ChromaDBAdapter",
-    "RAGFlowAdapter", 
-    "QAnythingAdapter",
-    "CustomRAGAdapter"
-]
+__all__ = ["ChromaDBAdapter", "RAGFlowAdapter", "QAnythingAdapter", "CustomRAGAdapter"]

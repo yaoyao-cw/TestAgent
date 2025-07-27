@@ -197,6 +197,73 @@ export interface WebSocketMessage {
   [key: string]: any
 }
 
+// 工作空间相关类型
+export interface WorkspaceFile {
+  path: string
+  name: string
+  type: 'file' | 'directory'
+  size?: number
+  modified_at: string
+  created_by?: string
+  content?: string
+  is_binary?: boolean
+}
+
+export interface WorkspaceStructure {
+  task_id: string
+  root_path: string
+  files: WorkspaceFile[]
+  total_files: number
+  total_size: number
+}
+
+export interface TimelineEvent {
+  id: string
+  timestamp: string
+  event_type: 'agent_start' | 'agent_complete' | 'file_created' | 'file_updated' | 'error' | 'status_change'
+  agent_name?: string
+  description: string
+  details?: any
+  file_path?: string
+  status?: string
+  duration?: number
+}
+
+export interface TaskTimeline {
+  task_id: string
+  events: TimelineEvent[]
+  total_events: number
+  start_time: string
+  end_time?: string
+  total_duration?: number
+}
+
+// 监控相关类型
+export interface PerformanceMetrics {
+  kv_cache_hit_rate: number
+  average_response_time: number
+  total_requests: number
+  error_rate: number
+  active_connections: number
+  memory_usage: number
+  cpu_usage: number
+}
+
+export interface AgentMetrics {
+  agent_name: string
+  total_executions: number
+  success_rate: number
+  average_execution_time: number
+  current_status: string
+  last_execution: string
+}
+
+export interface SystemMetrics {
+  performance: PerformanceMetrics
+  agents: AgentMetrics[]
+  timestamp: string
+}
+
 // 通用类型
 export interface ApiResponse<T = any> {
   data: T

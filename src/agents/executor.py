@@ -28,52 +28,54 @@ logger = get_logger("executor_agent")
 
 class EnhancedSandboxExecutor:
     """增强沙盒执行器
-    
+
     基于统一沙盒接口，提供强隔离的代码执行环境和完整的资源控制。
     """
-    
-    def __init__(self, timeout: int = 60, memory_limit: str = "512m", prefer_e2b: bool = True):
+
+    def __init__(
+        self, timeout: int = 60, memory_limit: str = "512m", prefer_e2b: bool = True
+    ):
         self.timeout = timeout
         self.memory_limit = memory_limit
         self.prefer_e2b = prefer_e2b
         self.sandbox = None
         self.python_repl = PythonREPLTool(timeout=timeout)  # 保留作为备用
-        
+
     async def __aenter__(self):
         """异步上下文管理器入口"""
         await self.start_sandbox()
         return self
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """异步上下文管理器出口"""
         await self.stop_sandbox()
-    
+
     async def start_sandbox(self):
         """启动沙盒环境"""
         logger.info("启动增强沙盒执行器")
-        
+
         try:
             self.sandbox = UnifiedSandboxExecutor(
                 timeout=self.timeout,
                 memory_limit=self.memory_limit,
-                prefer_e2b=self.prefer_e2b
+                prefer_e2b=self.prefer_e2b,
             )
             await self.sandbox.start_sandbox()
-            
+
             # 获取沙盒信息
             system_info = await self.sandbox.get_system_info()
             sandbox_type = self.sandbox.get_sandbox_type()
-            
+
             logger.info(f"沙盒启动成功，类型: {sandbox_type}")
             if sandbox_type == "e2b":
                 logger.info("使用E2B强隔离沙盒环境")
             else:
                 logger.info("使用回退沙盒环境")
-                
+
         except Exception as e:
             logger.error(f"沙盒启动失败: {e}")
             raise
-    
+
     async def stop_sandbox(self):
         """停止沙盒环境"""
         if self.sandbox:
@@ -83,137 +85,155 @@ class EnhancedSandboxExecutor:
                 logger.info("沙盒环境已停止")
             except Exception as e:
                 logger.error(f"停止沙盒失败: {e}")
-        
-    async def execute_python_script(self, script_content: str, script_name: str = "test_script.py") -> Dict[str, Any]:
+
+    async def execute_python_script(
+        self, script_content: str, script_name: str = "test_script.py"
+    ) -> Dict[str, Any]:
         """执行Python脚本"""
         if not self.sandbox:
             raise RuntimeError("沙盒环境未启动")
-        
+
         logger.info(f"在沙盒中执行Python脚本: {script_name}")
-        
+
         try:
             result = await self.sandbox.execute_python_script(
-                script_content=script_content,
-                script_name=script_name
+                script_content=script_content, script_name=script_name
             )
-            
-            logger.info(f"脚本执行完成: {script_name}, 成功: {result.get('success', False)}")
+
+            logger.info(
+                f"脚本执行完成: {script_name}, 成功: {result.get('success', False)}"
+            )
             return result
-            
+
         except Exception as e:
             logger.error(f"脚本执行异常: {script_name}, 错误: {e}")
             return {
-                'success': False,
-                'stdout': '',
-                'stderr': str(e),
-                'return_code': -1,
-                'script_name': script_name,
-                'execution_time': 0,
-                'memory_usage': None,
-                'error': str(e),
-                'sandbox_type': self.sandbox.get_sandbox_type() if self.sandbox else 'unknown'
+                "success": False,
+                "stdout": "",
+                "stderr": str(e),
+                "return_code": -1,
+                "script_name": script_name,
+                "execution_time": 0,
+                "memory_usage": None,
+                "error": str(e),
+                "sandbox_type": (
+                    self.sandbox.get_sandbox_type() if self.sandbox else "unknown"
+                ),
             }
-    
+
     async def execute_python_code(self, code: str) -> Dict[str, Any]:
         """执行Python代码片段"""
         if not self.sandbox:
             raise RuntimeError("沙盒环境未启动")
-        
+
         logger.info("在沙盒中执行Python代码片段")
-        
+
         try:
             result = await self.sandbox.execute_python_code(code)
-            
+
             # 添加额外信息以保持兼容性
-            result['script_name'] = 'code_snippet'
-            if 'result_value' not in result:
-                result['result_value'] = None
-            
+            result["script_name"] = "code_snippet"
+            if "result_value" not in result:
+                result["result_value"] = None
+
             logger.info(f"代码执行完成, 成功: {result.get('success', False)}")
             return result
-            
+
         except Exception as e:
             logger.error(f"代码执行异常: {e}")
             return {
-                'success': False,
-                'stdout': '',
-                'stderr': str(e),
-                'return_code': 1,
-                'script_name': 'code_snippet',
-                'execution_time': 0,
-                'memory_usage': None,
-                'error': str(e),
-                'result_value': None,
-                'sandbox_type': self.sandbox.get_sandbox_type() if self.sandbox else 'unknown'
+                "success": False,
+                "stdout": "",
+                "stderr": str(e),
+                "return_code": 1,
+                "script_name": "code_snippet",
+                "execution_time": 0,
+                "memory_usage": None,
+                "error": str(e),
+                "result_value": None,
+                "sandbox_type": (
+                    self.sandbox.get_sandbox_type() if self.sandbox else "unknown"
+                ),
             }
-    
-    async def execute_pytest_script(self, script_content: str, script_name: str = "test_script.py", test_args: List[str] = None) -> Dict[str, Any]:
+
+    async def execute_pytest_script(
+        self,
+        script_content: str,
+        script_name: str = "test_script.py",
+        test_args: List[str] = None,
+    ) -> Dict[str, Any]:
         """执行pytest测试脚本"""
         if not self.sandbox:
             raise RuntimeError("沙盒环境未启动")
-        
+
         logger.info(f"在沙盒中执行pytest测试: {script_name}")
-        
+
         try:
             result = await self.sandbox.execute_pytest_script(
                 script_content=script_content,
                 script_name=script_name,
-                test_args=test_args
+                test_args=test_args,
             )
-            
-            logger.info(f"pytest执行完成: {script_name}, 成功: {result.get('success', False)}")
+
+            logger.info(
+                f"pytest执行完成: {script_name}, 成功: {result.get('success', False)}"
+            )
             return result
-            
+
         except Exception as e:
             logger.error(f"pytest执行异常: {script_name}, 错误: {e}")
             return {
-                'success': False,
-                'stdout': '',
-                'stderr': str(e),
-                'return_code': -1,
-                'script_name': script_name,
-                'execution_time': 0,
-                'memory_usage': None,
-                'error': str(e),
-                'test_results': {'passed': 0, 'failed': 0, 'error': 0, 'skipped': 0},
-                'sandbox_type': self.sandbox.get_sandbox_type() if self.sandbox else 'unknown'
+                "success": False,
+                "stdout": "",
+                "stderr": str(e),
+                "return_code": -1,
+                "script_name": script_name,
+                "execution_time": 0,
+                "memory_usage": None,
+                "error": str(e),
+                "test_results": {"passed": 0, "failed": 0, "error": 0, "skipped": 0},
+                "sandbox_type": (
+                    self.sandbox.get_sandbox_type() if self.sandbox else "unknown"
+                ),
             }
-    
+
     async def install_packages(self, packages: List[str]) -> Dict[str, Any]:
         """在沙盒中安装Python包"""
         if not self.sandbox:
             raise RuntimeError("沙盒环境未启动")
-        
+
         logger.info(f"在沙盒中安装包: {packages}")
-        
+
         try:
             result = await self.sandbox.install_packages(packages)
             logger.info(f"包安装完成，成功: {result.get('success', False)}")
             return result
-            
+
         except Exception as e:
             logger.error(f"包安装异常: {e}")
             return {
-                'success': False,
-                'stdout': '',
-                'stderr': str(e),
-                'return_code': -1,
-                'packages': packages,
-                'error': str(e),
-                'sandbox_type': self.sandbox.get_sandbox_type() if self.sandbox else 'unknown'
+                "success": False,
+                "stdout": "",
+                "stderr": str(e),
+                "return_code": -1,
+                "packages": packages,
+                "error": str(e),
+                "sandbox_type": (
+                    self.sandbox.get_sandbox_type() if self.sandbox else "unknown"
+                ),
             }
-    
+
     async def get_system_info(self) -> Dict[str, Any]:
         """获取沙盒系统信息"""
         if not self.sandbox:
             raise RuntimeError("沙盒环境未启动")
-        
+
         try:
             return await self.sandbox.get_system_info()
         except Exception as e:
             logger.error(f"获取系统信息失败: {e}")
-            return {'error': str(e)}
-    
+            return {"error": str(e)}
+
     def get_sandbox_type(self) -> str:
         """获取沙盒类型"""
         if self.sandbox:
@@ -223,15 +243,15 @@ class EnhancedSandboxExecutor:
 
 class ExecutorAgent(BaseAgent):
     """Executor智能体
-    
+
     负责在强隔离环境中执行测试脚本，处理执行结果和错误日志。
     """
-    
+
     def __init__(self, global_state: GlobalState):
         super().__init__(AgentType.EXECUTOR, global_state)
         self.llm_service = get_llm_service()
         self.sandbox = None  # 将在需要时异步初始化
-        
+
         # Executor智能体可用的工具
         self.available_tools = [
             "file_read",
@@ -240,100 +260,100 @@ class ExecutorAgent(BaseAgent):
             "pytest_run",
             "sandbox_execute",
             "package_install",
-            "system_info"
+            "system_info",
         ]
-    
+
     def load(self, input_data: AgentInput) -> Dict[str, Any]:
         """加载阶段：加载测试脚本和执行配置"""
         logger.info("Executor智能体开始加载阶段")
-        
+
         # 获取全局上下文
         context = self.get_context_from_global_state()
-        
+
         # 加载任务相关文件
-        task_id = context.get('current_task_id')
+        task_id = context.get("current_task_id")
         task_files = {}
         test_scripts = []
-        
+
         if task_id:
             # 读取todo.md文件
             todo_content = self._read_todo_file(task_id)
-            task_files['todo'] = todo_content
-            
+            task_files["todo"] = todo_content
+
             # 读取测试脚本文件
             files = workspace_manager.get_task_files(task_id)
             for file_ref in files:
-                if file_ref.path.endswith('.py') and 'script' in file_ref.path.lower():
+                if file_ref.path.endswith(".py") and "script" in file_ref.path.lower():
                     content = self._read_file_content(task_id, file_ref.path)
                     task_files[file_ref.path] = content
-                    
+
                     # 解析脚本信息
-                    if file_ref.created_by == 'coder':
+                    if file_ref.created_by == "coder":
                         script_info = {
-                            'name': file_ref.path,
-                            'content': content,
-                            'file_ref': file_ref
+                            "name": file_ref.path,
+                            "content": content,
+                            "file_ref": file_ref,
                         }
                         test_scripts.append(script_info)
-        
+
         # 构建状态
         state = {
-            'input_data': input_data.data,
-            'context': context,
-            'task_files': task_files,
-            'test_scripts': test_scripts,
-            'prompt_template': self.get_prompt_template(),
-            'available_tools': self.available_tools,
-            'metadata': input_data.metadata or {},
-            'current_step': context.get('current_step', 0),
-            'task_id': task_id,
-            'execution_results': [],
-            'error_logs': [],
-            'todo_updates': []
+            "input_data": input_data.data,
+            "context": context,
+            "task_files": task_files,
+            "test_scripts": test_scripts,
+            "prompt_template": self.get_prompt_template(),
+            "available_tools": self.available_tools,
+            "metadata": input_data.metadata or {},
+            "current_step": context.get("current_step", 0),
+            "task_id": task_id,
+            "execution_results": [],
+            "error_logs": [],
+            "todo_updates": [],
         }
-        
-        logger.info(f"Executor智能体加载完成，任务ID: {task_id}, 脚本数: {len(test_scripts)}")
+
+        logger.info(
+            f"Executor智能体加载完成，任务ID: {task_id}, 脚本数: {len(test_scripts)}"
+        )
         return state
-    
+
     async def llm(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """LLM阶段：分析脚本并制定执行计划"""
         logger.info("Executor智能体进入LLM阶段")
-        
-        test_scripts = state.get('test_scripts', [])
-        
+
+        test_scripts = state.get("test_scripts", [])
+
         if not test_scripts:
-            state['llm_output'] = {
-                'execution_plan': [],
-                'error': '没有可执行的测试脚本',
-                'completed': False
+            state["llm_output"] = {
+                "execution_plan": [],
+                "error": "没有可执行的测试脚本",
+                "completed": False,
             }
             return state
-        
+
         # 初始化沙盒环境
         if not self.sandbox:
             try:
                 self.sandbox = EnhancedSandboxExecutor(
-                    timeout=60,
-                    memory_limit="512m",
-                    prefer_e2b=True
+                    timeout=60, memory_limit="512m", prefer_e2b=True
                 )
                 await self.sandbox.start_sandbox()
-                
+
                 # 获取沙盒信息
                 system_info = await self.sandbox.get_system_info()
                 sandbox_type = self.sandbox.get_sandbox_type()
-                
+
                 logger.info(f"沙盒环境已启动，类型: {sandbox_type}")
-                
+
             except Exception as e:
                 logger.error(f"沙盒初始化失败: {e}")
-                state['llm_output'] = {
-                    'execution_plan': [],
-                    'error': f'沙盒初始化失败: {str(e)}',
-                    'completed': False
+                state["llm_output"] = {
+                    "execution_plan": [],
+                    "error": f"沙盒初始化失败: {str(e)}",
+                    "completed": False,
                 }
                 return state
-        
+
         # 构建执行分析提示
         sandbox_info = await self.sandbox.get_system_info()
         analysis_prompt = f"""
@@ -357,45 +377,49 @@ class ExecutorAgent(BaseAgent):
 
 请制定详细的执行计划：
 """
-        
+
         try:
             messages = [
                 {"role": "system", "content": self.get_prompt_template()},
-                {"role": "user", "content": analysis_prompt}
+                {"role": "user", "content": analysis_prompt},
             ]
-            
-            response = self.llm_service.invoke_sync(messages, agent_type=self.agent_type)
+
+            response = self.llm_service.invoke_sync(
+                messages, agent_type=self.agent_type
+            )
             analysis_result = response.content.strip()
-            
+
             # 执行所有脚本
             execution_results = []
             for script in test_scripts:
                 result = await self._execute_script(script, state)
                 execution_results.append(result)
-            
-            state['llm_output'] = {
-                'analysis': analysis_result,
-                'execution_plan': [script['name'] for script in test_scripts],
-                'execution_results': execution_results,
-                'completed': True,
-                'sandbox_type': self.sandbox.get_sandbox_type(),
-                'system_info': sandbox_info
+
+            state["llm_output"] = {
+                "analysis": analysis_result,
+                "execution_plan": [script["name"] for script in test_scripts],
+                "execution_results": execution_results,
+                "completed": True,
+                "sandbox_type": self.sandbox.get_sandbox_type(),
+                "system_info": sandbox_info,
             }
-            
+
             # 更新状态中的执行结果
-            state['execution_results'] = execution_results
-            
+            state["execution_results"] = execution_results
+
             logger.info(f"LLM阶段完成，执行了 {len(execution_results)} 个脚本")
-            
+
         except Exception as e:
             logger.error(f"LLM阶段出错: {e}")
-            state['llm_output'] = {
-                'analysis': f'分析失败: {str(e)}',
-                'execution_plan': [],
-                'execution_results': [],
-                'error': str(e),
-                'completed': False,
-                'sandbox_type': self.sandbox.get_sandbox_type() if self.sandbox else 'unknown'
+            state["llm_output"] = {
+                "analysis": f"分析失败: {str(e)}",
+                "execution_plan": [],
+                "execution_results": [],
+                "error": str(e),
+                "completed": False,
+                "sandbox_type": (
+                    self.sandbox.get_sandbox_type() if self.sandbox else "unknown"
+                ),
             }
         finally:
             # 清理沙盒资源
@@ -405,23 +429,23 @@ class ExecutorAgent(BaseAgent):
                     self.sandbox = None
                 except Exception as e:
                     logger.error(f"清理沙盒资源失败: {e}")
-        
+
         return state
-    
+
     def router(self, state: Dict[str, Any]) -> AgentOutput:
         """路由阶段：根据执行结果决定下一步"""
         logger.info("Executor智能体进入路由阶段")
-        
-        llm_output = state.get('llm_output', {})
-        execution_results = llm_output.get('execution_results', [])
-        completed = llm_output.get('completed', False)
-        
+
+        llm_output = state.get("llm_output", {})
+        execution_results = llm_output.get("execution_results", [])
+        completed = llm_output.get("completed", False)
+
         # 保存执行结果文件
-        task_id = state.get('task_id')
-        current_step = state.get('current_step', 0)
-        
+        task_id = state.get("task_id")
+        current_step = state.get("current_step", 0)
+
         output_files = []
-        
+
         # 保存执行结果报告
         if execution_results:
             results_content = self._format_execution_results(execution_results)
@@ -431,11 +455,11 @@ class ExecutorAgent(BaseAgent):
                 self.agent_type,
                 "ExecutionResults",
                 results_content,
-                FileType.MARKDOWN
+                FileType.MARKDOWN,
             )
             if filename:
                 output_files.append(filename)
-        
+
         # 保存错误日志
         error_logs = self._collect_error_logs(execution_results)
         if error_logs:
@@ -446,68 +470,74 @@ class ExecutorAgent(BaseAgent):
                 self.agent_type,
                 "ErrorLogs",
                 error_content,
-                FileType.LOG
+                FileType.LOG,
             )
             if filename:
                 output_files.append(filename)
-            
+
             # 同时追加到全局错误日志
             for error_log in error_logs:
                 workspace_manager.append_error_log(task_id, error_log)
-        
+
         # 更新todo.md
-        if state.get('todo_updates'):
-            self._update_todo_with_progress(task_id, state['todo_updates'])
-        
+        if state.get("todo_updates"):
+            self._update_todo_with_progress(task_id, state["todo_updates"])
+
         # 生成todo更新
         todo_update = self._generate_todo_update(execution_results)
         if todo_update:
             self._update_todo_with_progress(task_id, [todo_update])
-        
+
         # 决定下一个智能体
         next_agent = None
         if completed:
             # 检查执行结果
-            success_count = sum(1 for result in execution_results if result.get('success', False))
+            success_count = sum(
+                1 for result in execution_results if result.get("success", False)
+            )
             total_count = len(execution_results)
-            
+
             if success_count == total_count:
                 # 全部成功，转到Reporter生成报告
                 next_agent = "reporter"
             else:
                 # 有失败的测试，转到Reviewer进行分析
                 next_agent = "reviewer"
-        
+
         # 更新全局状态
-        self.update_global_state({
-            'step': current_step + 1,
-            'last_output': output_files[-1] if output_files else None
-        })
-        
+        self.update_global_state(
+            {
+                "step": current_step + 1,
+                "last_output": output_files[-1] if output_files else None,
+            }
+        )
+
         # 计算执行统计
-        success_count = sum(1 for result in execution_results if result.get('success', False))
+        success_count = sum(
+            1 for result in execution_results if result.get("success", False)
+        )
         total_count = len(execution_results)
-        
+
         return AgentOutput(
             data={
-                'execution_results': execution_results,
-                'analysis': llm_output.get('analysis', ''),
-                'output_files': output_files,
-                'completed': completed,
-                'success_count': success_count,
-                'total_count': total_count,
-                'success_rate': success_count / max(total_count, 1)
+                "execution_results": execution_results,
+                "analysis": llm_output.get("analysis", ""),
+                "output_files": output_files,
+                "completed": completed,
+                "success_count": success_count,
+                "total_count": total_count,
+                "success_rate": success_count / max(total_count, 1),
             },
             next_agent=next_agent,
             metadata={
-                'agent': self.name,
-                'phase_completed': True,
-                'files_created': len(output_files),
-                'scripts_executed': total_count,
-                'success_rate': success_count / max(total_count, 1)
-            }
+                "agent": self.name,
+                "phase_completed": True,
+                "files_created": len(output_files),
+                "scripts_executed": total_count,
+                "success_rate": success_count / max(total_count, 1),
+            },
         )
-    
+
     def get_prompt_template(self) -> str:
         """获取Executor智能体的提示词模板"""
         return """你是一个专业的测试执行智能体(Executor)，专门负责在强隔离沙盒环境中安全执行测试脚本。
@@ -563,90 +593,96 @@ class ExecutorAgent(BaseAgent):
 
 请基于以上能力和标准，专业地分析和执行测试脚本，确保安全性和可靠性。
 """
-    
-    async def _execute_script(self, script: Dict[str, Any], state: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _execute_script(
+        self, script: Dict[str, Any], state: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """执行单个脚本"""
-        script_name = script['name']
-        script_content = script['content']
-        
+        script_name = script["name"]
+        script_content = script["content"]
+
         logger.info(f"开始执行脚本: {script_name}")
-        
+
         if not self.sandbox:
             logger.error("沙盒环境未初始化")
             return {
-                'success': False,
-                'stdout': '',
-                'stderr': '沙盒环境未初始化',
-                'return_code': -1,
-                'script_name': script_name,
-                'script_type': 'unknown',
-                'execution_time': 0,
-                'memory_usage': None,
-                'error': '沙盒环境未初始化',
-                'sandbox_type': 'unknown'
+                "success": False,
+                "stdout": "",
+                "stderr": "沙盒环境未初始化",
+                "return_code": -1,
+                "script_name": script_name,
+                "script_type": "unknown",
+                "execution_time": 0,
+                "memory_usage": None,
+                "error": "沙盒环境未初始化",
+                "sandbox_type": "unknown",
             }
-        
+
         try:
             # 判断脚本类型并执行
-            if 'pytest' in script_content.lower() or 'test_' in script_name:
+            if "pytest" in script_content.lower() or "test_" in script_name:
                 # 执行pytest测试
                 result = await self.sandbox.execute_pytest_script(
-                    script_content=script_content,
-                    script_name=script_name
+                    script_content=script_content, script_name=script_name
                 )
-                script_type = 'pytest'
+                script_type = "pytest"
             else:
                 # 执行Python脚本
                 result = await self.sandbox.execute_python_script(
-                    script_content=script_content,
-                    script_name=script_name
+                    script_content=script_content, script_name=script_name
                 )
-                script_type = 'python'
-            
+                script_type = "python"
+
             # 添加脚本类型信息
-            result['script_type'] = script_type
-            
+            result["script_type"] = script_type
+
             # 记录执行统计
-            success = result.get('success', False)
-            execution_time = result.get('execution_time', 0)
-            sandbox_type = result.get('sandbox_type', 'unknown')
-            
-            logger.info(f"脚本执行完成: {script_name}, 成功: {success}, 耗时: {execution_time:.2f}秒, 沙盒: {sandbox_type}")
+            success = result.get("success", False)
+            execution_time = result.get("execution_time", 0)
+            sandbox_type = result.get("sandbox_type", "unknown")
+
+            logger.info(
+                f"脚本执行完成: {script_name}, 成功: {success}, 耗时: {execution_time:.2f}秒, 沙盒: {sandbox_type}"
+            )
             return result
-            
+
         except Exception as e:
             logger.error(f"脚本执行异常: {script_name}, 错误: {e}")
             return {
-                'success': False,
-                'stdout': '',
-                'stderr': str(e),
-                'return_code': -1,
-                'script_name': script_name,
-                'script_type': 'unknown',
-                'execution_time': 0,
-                'memory_usage': None,
-                'error': str(e),
-                'sandbox_type': self.sandbox.get_sandbox_type() if self.sandbox else 'unknown'
+                "success": False,
+                "stdout": "",
+                "stderr": str(e),
+                "return_code": -1,
+                "script_name": script_name,
+                "script_type": "unknown",
+                "execution_time": 0,
+                "memory_usage": None,
+                "error": str(e),
+                "sandbox_type": (
+                    self.sandbox.get_sandbox_type() if self.sandbox else "unknown"
+                ),
             }
-    
+
     def _format_scripts_for_analysis(self, scripts: List[Dict[str, Any]]) -> str:
         """格式化脚本信息用于分析"""
         formatted = []
         for i, script in enumerate(scripts, 1):
-            name = script['name']
-            content = script['content']
+            name = script["name"]
+            content = script["content"]
             content_preview = content[:200] + "..." if len(content) > 200 else content
-            
-            formatted.append(f"""
+
+            formatted.append(
+                f"""
 脚本 {i}: {name}
 内容预览:
 ```python
 {content_preview}
 ```
-""")
-        
-        return '\n'.join(formatted)
-    
+"""
+            )
+
+        return "\n".join(formatted)
+
     def _format_execution_results(self, results: List[Dict[str, Any]]) -> str:
         """格式化执行结果"""
         content = f"""# 测试执行结果报告
@@ -657,11 +693,11 @@ class ExecutorAgent(BaseAgent):
 ## 执行摘要
 
 """
-        
-        success_count = sum(1 for r in results if r.get('success', False))
+
+        success_count = sum(1 for r in results if r.get("success", False))
         total_count = len(results)
         success_rate = success_count / max(total_count, 1) * 100
-        
+
         content += f"""
 - 总脚本数: {total_count}
 - 成功执行: {success_count}
@@ -671,16 +707,16 @@ class ExecutorAgent(BaseAgent):
 ## 详细结果
 
 """
-        
+
         for i, result in enumerate(results, 1):
-            script_name = result.get('script_name', f'脚本{i}')
-            success = result.get('success', False)
-            stdout = result.get('stdout', '')
-            stderr = result.get('stderr', '')
-            execution_time = result.get('execution_time', 0)
-            
-            status_icon = '✅' if success else '❌'
-            
+            script_name = result.get("script_name", f"脚本{i}")
+            success = result.get("success", False)
+            stdout = result.get("stdout", "")
+            stderr = result.get("stderr", "")
+            execution_time = result.get("execution_time", 0)
+
+            status_icon = "✅" if success else "❌"
+
             content += f"""
 ### {status_icon} {script_name}
 
@@ -701,24 +737,24 @@ class ExecutorAgent(BaseAgent):
 ---
 
 """
-        
+
         return content
-    
+
     def _collect_error_logs(self, results: List[Dict[str, Any]]) -> List[str]:
         """收集错误日志"""
         error_logs = []
-        
+
         for result in results:
-            if not result.get('success', False):
-                script_name = result.get('script_name', 'unknown')
-                error = result.get('error', result.get('stderr', '未知错误'))
-                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                
+            if not result.get("success", False):
+                script_name = result.get("script_name", "unknown")
+                error = result.get("error", result.get("stderr", "未知错误"))
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
                 error_log = f"[{timestamp}] {script_name}: {error}"
                 error_logs.append(error_log)
-        
+
         return error_logs
-    
+
     def _format_error_logs(self, error_logs: List[str]) -> str:
         """格式化错误日志"""
         content = f"""# 执行错误日志
@@ -729,17 +765,17 @@ class ExecutorAgent(BaseAgent):
 ## 错误详情
 
 """
-        
+
         for error_log in error_logs:
             content += f"{error_log}\n"
-        
+
         return content
-    
+
     def _generate_todo_update(self, results: List[Dict[str, Any]]) -> str:
         """生成todo更新内容"""
-        success_count = sum(1 for r in results if r.get('success', False))
+        success_count = sum(1 for r in results if r.get("success", False))
         total_count = len(results)
-        
+
         return f"""
 ## Executor智能体执行报告 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
 
@@ -762,63 +798,63 @@ class ExecutorAgent(BaseAgent):
 - 详细的执行日志已保存
 - 错误信息已记录到错误日志
 """
-    
+
     def _format_results_summary(self, results: List[Dict[str, Any]]) -> str:
         """格式化结果摘要"""
         if not results:
             return "无执行结果"
-        
+
         summary_lines = []
         for result in results:
-            name = result.get('script_name', '未知脚本')
-            success = result.get('success', False)
-            status = '✅' if success else '❌'
-            
+            name = result.get("script_name", "未知脚本")
+            success = result.get("success", False)
+            status = "✅" if success else "❌"
+
             summary_lines.append(f"- {status} {name}")
-        
-        return '\n'.join(summary_lines)
-    
+
+        return "\n".join(summary_lines)
+
     def _read_todo_file(self, task_id: str) -> str:
         """读取todo.md文件内容"""
         try:
             task_metadata = workspace_manager.load_task_metadata(task_id)
             if not task_metadata:
                 return ""
-            
+
             todo_path = Path(task_metadata.workspace_path) / "todo.md"
             if todo_path.exists():
-                return todo_path.read_text(encoding='utf-8')
+                return todo_path.read_text(encoding="utf-8")
         except Exception as e:
             logger.error(f"读取todo.md失败: {e}")
-        
+
         return ""
-    
+
     def _read_file_content(self, task_id: str, filename: str) -> str:
         """读取指定文件内容"""
         try:
             task_metadata = workspace_manager.load_task_metadata(task_id)
             if not task_metadata:
                 return ""
-            
+
             file_path = Path(task_metadata.workspace_path) / filename
             if file_path.exists():
-                return file_path.read_text(encoding='utf-8')
+                return file_path.read_text(encoding="utf-8")
         except Exception as e:
             logger.error(f"读取文件 {filename} 失败: {e}")
-        
+
         return ""
-    
+
     def _update_todo_with_progress(self, task_id: str, updates: List[str]):
         """更新todo.md文件"""
         try:
             current_todo = self._read_todo_file(task_id)
-            
+
             # 添加更新内容
             updated_content = current_todo + "\n\n" + "\n\n".join(updates)
-            
+
             workspace_manager.update_todo_file(task_id, updated_content)
             logger.info(f"已更新todo.md文件，添加了 {len(updates)} 个更新")
-            
+
         except Exception as e:
             logger.error(f"更新todo.md失败: {e}")
 

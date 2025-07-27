@@ -4,10 +4,21 @@
 """
 
 # 导出核心接口
-from .interfaces import RAGServiceInterface, Document, SearchResult, ServiceHealthInfo, RAGServiceStatus
+from .interfaces import (
+    RAGServiceInterface,
+    Document,
+    SearchResult,
+    ServiceHealthInfo,
+    RAGServiceStatus,
+)
 
 # 导出适配器
-from .adapters import ChromaDBAdapter, RAGFlowAdapter, QAnythingAdapter, CustomRAGAdapter
+from .adapters import (
+    ChromaDBAdapter,
+    RAGFlowAdapter,
+    QAnythingAdapter,
+    CustomRAGAdapter,
+)
 
 # 导出管理器
 from .service_manager import RAGServiceManager, ServiceConfig, ServicePriority
@@ -23,31 +34,28 @@ from .text_splitter import TextSplitter, SemanticTextSplitter, TextChunk
 __all__ = [
     # 核心接口
     "RAGServiceInterface",
-    "Document", 
+    "Document",
     "SearchResult",
     "ServiceHealthInfo",
     "RAGServiceStatus",
-    
     # 适配器
     "ChromaDBAdapter",
-    "RAGFlowAdapter", 
+    "RAGFlowAdapter",
     "QAnythingAdapter",
     "CustomRAGAdapter",
-    
     # 管理器
     "RAGServiceManager",
     "ServiceConfig",
     "ServicePriority",
     "RAGConfigManager",
-    
     # 向后兼容
     "RAGService",
     "LegacyRAGServiceManager",
     "VectorDatabase",
-    "ChromaVectorDatabase", 
+    "ChromaVectorDatabase",
     "EmbeddingService",
     "DocumentParser",
     "TextSplitter",
     "SemanticTextSplitter",
-    "TextChunk"
+    "TextChunk",
 ]

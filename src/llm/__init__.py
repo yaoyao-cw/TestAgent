@@ -20,5 +20,5 @@ __all__ = [
     "LLMProvider",
     "ModelInfo",
     "get_model_info",
-    "get_recommended_models"
+    "get_recommended_models",
 ]

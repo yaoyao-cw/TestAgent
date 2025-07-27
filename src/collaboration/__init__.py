@@ -8,8 +8,8 @@ from .content_optimizer import ContentOptimizer
 
 __all__ = [
     "PlanReviewer",
-    "FeedbackProcessor", 
+    "FeedbackProcessor",
     "AutoAcceptManager",
     "ReportEditor",
-    "ContentOptimizer"
+    "ContentOptimizer",
 ]

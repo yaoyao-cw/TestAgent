@@ -14,6 +14,9 @@ from .test_team import TestTeamRouter, create_test_team_router
 from .tester import TesterAgent, create_tester_agent
 from .coder import CoderAgent, create_coder_agent
 from .executor import ExecutorAgent, create_executor_agent
+from .reviewer import ReviewerAgent, create_reviewer_agent
+from .reporter import ReporterAgent, create_reporter_agent
+from .human import HumanAgent, create_human_agent
 
 from ..config.logging_config import get_logger
 
@@ -31,20 +34,26 @@ class AgentFactory:
         self.agent_classes = {
             AgentType.COORDINATOR: CoordinatorAgent,
             AgentType.PLANNER: PlannerAgent,
+            AgentType.REVIEWER: ReviewerAgent,
+            AgentType.REPORTER: ReporterAgent,
             "test_team": TestTeamRouter,  # 特殊的路由器
             "tester": TesterAgent,
             "coder": CoderAgent,
             "executor": ExecutorAgent,
+            "human": HumanAgent,
         }
 
         # 智能体创建函数映射
         self.agent_creators = {
             AgentType.COORDINATOR: create_coordinator_agent,
             AgentType.PLANNER: create_planner_agent,
+            AgentType.REVIEWER: create_reviewer_agent,
+            AgentType.REPORTER: create_reporter_agent,
             "test_team": create_test_team_router,
             "tester": create_tester_agent,
             "coder": create_coder_agent,
             "executor": create_executor_agent,
+            "human": create_human_agent,
         }
 
         # 智能体实例缓存

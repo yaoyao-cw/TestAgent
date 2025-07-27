@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { Plus, Search, Filter, RefreshCw, Play, Square, RotateCcw } from 'lucide-react'
+import { Plus, Search, Filter, RefreshCw, Play, Square, RotateCcw, FolderOpen } from 'lucide-react'
 import { useTasks, useCancelTask, useRetryTask } from '@/hooks/useTasks'
 import { cn, formatDate, formatDuration, getStatusColor, getStatusText } from '@/lib/utils'
+import { WorkspaceViewer } from '@/components/workspace'
 import type { Task } from '@/types'
 
 const STATUS_OPTIONS = [
@@ -29,6 +30,8 @@ export function TasksPage() {
     page: 1,
     page_size: 20,
   })
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [showWorkspace, setShowWorkspace] = useState(false)
   
   const { data: tasksData, isLoading, refetch } = useTasks(filters)
   const cancelTaskMutation = useCancelTask()
@@ -54,8 +57,25 @@ export function TasksPage() {
     }
   }
 
+  const handleViewWorkspace = (taskId: string) => {
+    setSelectedTaskId(taskId)
+    setShowWorkspace(true)
+  }
+
   const getActionButtons = (task: Task) => {
     const buttons = []
+
+    // 查看工作空间按钮
+    buttons.push(
+      <button
+        key="workspace"
+        onClick={() => handleViewWorkspace(task.task_id)}
+        className="btn btn-ghost btn-sm text-primary-600 hover:text-primary-700"
+      >
+        <FolderOpen className="w-3 h-3 mr-1" />
+        工作空间
+      </button>
+    )
 
     if (task.status === 'running' || task.status === 'pending') {
       buttons.push(
@@ -261,7 +281,10 @@ export function TasksPage() {
 
                   {/* 操作按钮 */}
                   <div className="flex items-center space-x-2 ml-4">
-                    <button className="btn btn-ghost btn-sm">
+                    <button 
+                      onClick={() => window.location.href = `/tasks/${task.task_id}`}
+                      className="btn btn-ghost btn-sm"
+                    >
                       查看详情
                     </button>
                     {getActionButtons(task)}
@@ -301,6 +324,28 @@ export function TasksPage() {
           </div>
         )}
       </div>
+
+      {/* 工作空间查看器 */}
+      {showWorkspace && selectedTaskId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-6xl h-full max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">
+                任务工作空间 - {selectedTaskId.slice(-8)}
+              </h2>
+              <button
+                onClick={() => setShowWorkspace(false)}
+                className="btn btn-ghost btn-sm"
+              >
+                关闭
+              </button>
+            </div>
+            <div className="flex-1 p-4">
+              <WorkspaceViewer taskId={selectedTaskId} className="h-full" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

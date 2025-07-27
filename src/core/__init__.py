@@ -24,7 +24,7 @@ from .exceptions import (
     TimeoutError,
     ResourceError,
     get_error_message,
-    create_error_from_code
+    create_error_from_code,
 )
 
 from .error_handler import (
@@ -33,7 +33,7 @@ from .error_handler import (
     handle_errors,
     safe_execute,
     error_context,
-    setup_global_exception_handler
+    setup_global_exception_handler,
 )
 
 from .monitoring import (
@@ -51,7 +51,7 @@ from .monitoring import (
     get_health_checker,
     get_profiler,
     initialize_monitoring,
-    shutdown_monitoring
+    shutdown_monitoring,
 )
 
 from .recovery import (
@@ -61,14 +61,10 @@ from .recovery import (
     RecoveryManager,
     get_recovery_manager,
     with_recovery,
-    initialize_recovery_system
+    initialize_recovery_system,
 )
 
-from .workspace import (
-    TaskFileSystemManager,
-    FileNamingManager,
-    workspace_manager
-)
+from .workspace import TaskFileSystemManager, FileNamingManager, workspace_manager
 
 from .base_agent import (
     BaseAgent,
@@ -76,7 +72,7 @@ from .base_agent import (
     ReActAgent,
     AgentInput,
     AgentOutput,
-    AgentPhase
+    AgentPhase,
 )
 
 from .agent_router import (
@@ -84,7 +80,7 @@ from .agent_router import (
     RoutingRule,
     Message,
     RoutingStrategy,
-    ConditionalRouter
+    ConditionalRouter,
 )
 
 from .data_models import (
@@ -97,7 +93,7 @@ from .data_models import (
     APIResponse,
     HealthCheckResponse,
     get_global_config,
-    set_global_config
+    set_global_config,
 )
 
 from .dependencies import (
@@ -105,7 +101,7 @@ from .dependencies import (
     DependencyChecker,
     ProjectInitializer,
     check_system_requirements,
-    initialize_testagent_project
+    initialize_testagent_project,
 )
 
 __all__ = [
@@ -129,7 +125,6 @@ __all__ = [
     "ResourceError",
     "get_error_message",
     "create_error_from_code",
-    
     # Error Handler
     "ErrorHandler",
     "get_error_handler",
@@ -137,7 +132,6 @@ __all__ = [
     "safe_execute",
     "error_context",
     "setup_global_exception_handler",
-    
     # Monitoring
     "Metric",
     "PerformanceStats",
@@ -154,7 +148,6 @@ __all__ = [
     "get_profiler",
     "initialize_monitoring",
     "shutdown_monitoring",
-    
     # Recovery
     "ServiceLevel",
     "RecoveryAction",
@@ -163,12 +156,10 @@ __all__ = [
     "get_recovery_manager",
     "with_recovery",
     "initialize_recovery_system",
-    
     # 工作空间管理
     "TaskFileSystemManager",
-    "FileNamingManager", 
+    "FileNamingManager",
     "workspace_manager",
-    
     # 智能体编排
     "BaseAgent",
     "SimpleAgent",
@@ -181,11 +172,10 @@ __all__ = [
     "Message",
     "RoutingStrategy",
     "ConditionalRouter",
-    
     # 数据模型和配置
     "ApplicationConfig",
     "SystemInfo",
-    "PathConfig", 
+    "PathConfig",
     "EnvironmentConfig",
     "DatabaseConfig",
     "LLMConfig",
@@ -193,49 +183,49 @@ __all__ = [
     "HealthCheckResponse",
     "get_global_config",
     "set_global_config",
-    
     # 依赖管理
     "VirtualEnvironmentManager",
     "DependencyChecker",
     "ProjectInitializer",
     "check_system_requirements",
-    "initialize_testagent_project"
+    "initialize_testagent_project",
 ]
 
 
 def initialize_core_systems():
     """初始化核心系统"""
     import logging
+
     logger = logging.getLogger("core_init")
-    
+
     success = True
-    
+
     try:
         # 设置全局异常处理器
         setup_global_exception_handler()
         logger.info("Global exception handler initialized")
-        
+
         # 初始化监控系统
         if initialize_monitoring():
             logger.info("Monitoring system initialized")
         else:
             logger.warning("Monitoring system initialization failed")
             success = False
-        
+
         # 初始化恢复系统
         if initialize_recovery_system():
             logger.info("Recovery system initialized")
         else:
             logger.warning("Recovery system initialization failed")
             success = False
-        
+
         if success:
             logger.info("All core systems initialized successfully")
         else:
             logger.warning("Some core systems failed to initialize")
-        
+
         return success
-        
+
     except Exception as e:
         logger.error(f"Failed to initialize core systems: {e}")
         return False
@@ -244,13 +234,14 @@ def initialize_core_systems():
 def shutdown_core_systems():
     """关闭核心系统"""
     import logging
+
     logger = logging.getLogger("core_shutdown")
-    
+
     try:
         # 关闭监控系统
         shutdown_monitoring()
         logger.info("Core systems shutdown completed")
-        
+
     except Exception as e:
         logger.error(f"Error during core systems shutdown: {e}")
 

@@ -5,13 +5,13 @@ from .testagent_client import (
     TestAgentWebSocketClient,
     TestAgentSyncClient,
     TaskSubmissionRequest,
-    TaskResult
+    TaskResult,
 )
 
 __all__ = [
     "TestAgentClient",
-    "TestAgentWebSocketClient", 
+    "TestAgentWebSocketClient",
     "TestAgentSyncClient",
     "TaskSubmissionRequest",
-    "TaskResult"
+    "TaskResult",
 ]

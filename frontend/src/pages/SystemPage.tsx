@@ -1,9 +1,11 @@
-import React from 'react'
-import { Activity, Cpu, HardDrive, Wifi, Users, Clock } from 'lucide-react'
+import React, { useState } from 'react'
+import { Activity, Cpu, HardDrive, Wifi, Users, Clock, BarChart3, Monitor } from 'lucide-react'
 import { useSystemStatus, useSystemMetrics } from '@/hooks/useSystemStatus'
+import { MonitoringDashboard } from '@/components/monitoring'
 import { formatDuration, cn } from '@/lib/utils'
 
 export function SystemPage() {
+  const [activeTab, setActiveTab] = useState<'overview' | 'monitoring'>('overview')
   const { data: systemStatus, isLoading } = useSystemStatus()
   const { data: metrics } = useSystemMetrics(24)
 
@@ -36,14 +38,49 @@ export function SystemPage() {
       <div className="max-w-7xl mx-auto">
         {/* 页面头部 */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">系统监控</h1>
-          <p className="text-gray-600">
-            实时监控TestAgent系统的运行状态和性能指标
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">系统监控</h1>
+              <p className="text-gray-600">
+                实时监控TestAgent系统的运行状态和性能指标
+              </p>
+            </div>
+            
+            {/* 标签页切换 */}
+            <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={cn(
+                  "flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                  activeTab === 'overview'
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                <Activity className="w-4 h-4" />
+                <span>系统概览</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('monitoring')}
+                className={cn(
+                  "flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                  activeTab === 'monitoring'
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>实时监控</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* 系统概览 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* 内容区域 */}
+        {activeTab === 'overview' ? (
+          <>
+            {/* 系统概览 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -226,6 +263,11 @@ export function SystemPage() {
             ))}
           </div>
         </div>
+          </>
+        ) : (
+          /* 实时监控仪表板 */
+          <MonitoringDashboard />
+        )}
       </div>
     </div>
   )
