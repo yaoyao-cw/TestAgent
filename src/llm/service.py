@@ -5,8 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import (AIMessage, BaseMessage, HumanMessage,
-                                     SystemMessage)
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
 from ..config.logging_config import get_logger
 from ..exceptions import LLMServiceException

@@ -10,8 +10,12 @@ from typing import Any, Dict, List, Optional, Union
 from ..config.logging_config import get_logger
 from ..core.base_agent import AgentInput, AgentOutput, SimpleAgent
 from ..llm.service import get_llm_service
-from ..models.review import (RequirementReview, ReviewScore, TestCaseReview,
-                             TestScriptReview)
+from ..models.review import (
+    RequirementReview,
+    ReviewScore,
+    TestCaseReview,
+    TestScriptReview,
+)
 from ..models.types import AgentType, TaskType
 from ..models.workspace import GlobalState, TaskStatus
 

@@ -24,10 +24,18 @@ except ImportError:
     redis_sync = None
 
 from ..config.logging_config import get_logger
-from .health_monitor import (HealthChecker, HealthCheckResult, HealthStatus,
-                             register_health_check)
-from .service_registry import (ServiceInfo, ServicePriority, ServiceType,
-                               register_service)
+from .health_monitor import (
+    HealthChecker,
+    HealthCheckResult,
+    HealthStatus,
+    register_health_check,
+)
+from .service_registry import (
+    ServiceInfo,
+    ServicePriority,
+    ServiceType,
+    register_service,
+)
 
 logger = get_logger("redis_service")
 

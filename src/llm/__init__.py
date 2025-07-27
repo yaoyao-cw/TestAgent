@@ -1,12 +1,9 @@
 """LLM服务模块"""
 
 from .config import AgentLLMMapping, LLMConfig, LLMProviderConfig
-from .factory import (LLMFactory, get_llm_by_type, get_llm_factory,
-                      get_llm_for_agent)
-from .providers import (LLMProvider, ModelInfo, get_model_info,
-                        get_recommended_models)
-from .service import (LLMService, get_llm_service, invoke_llm,
-                      invoke_llm_for_agent)
+from .factory import LLMFactory, get_llm_by_type, get_llm_factory, get_llm_for_agent
+from .providers import LLMProvider, ModelInfo, get_model_info, get_recommended_models
+from .service import LLMService, get_llm_service, invoke_llm, invoke_llm_for_agent
 
 __all__ = [
     "LLMService",

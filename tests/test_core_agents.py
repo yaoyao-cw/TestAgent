@@ -9,10 +9,16 @@ from pathlib import Path
 
 import pytest
 
-from src.agents import (create_coder_agent, create_coordinator_agent,
-                        create_executor_agent, create_planner_agent,
-                        create_test_team_router, create_tester_agent,
-                        create_workflow, get_agent_factory)
+from src.agents import (
+    create_coder_agent,
+    create_coordinator_agent,
+    create_executor_agent,
+    create_planner_agent,
+    create_test_team_router,
+    create_tester_agent,
+    create_workflow,
+    get_agent_factory,
+)
 from src.core.base_agent import AgentInput
 from src.models.types import AgentType, TaskType
 from src.models.workspace import GlobalState, TaskMetadata

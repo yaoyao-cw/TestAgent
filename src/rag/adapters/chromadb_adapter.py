@@ -17,8 +17,13 @@ except ImportError:
 from ...config.logging_config import get_logger
 from ...exceptions import RAGServiceException
 from ..embedding_service import EmbeddingService
-from ..interfaces import (Document, RAGServiceInterface, RAGServiceStatus,
-                          SearchResult, ServiceHealthInfo)
+from ..interfaces import (
+    Document,
+    RAGServiceInterface,
+    RAGServiceStatus,
+    SearchResult,
+    ServiceHealthInfo,
+)
 
 logger = get_logger("chromadb_adapter")
 

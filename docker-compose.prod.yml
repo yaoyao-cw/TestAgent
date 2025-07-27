@@ -1,0 +1,469 @@
+# TestAgent 生产环境 Docker Compose 配置
+version: '3.8'
+
+services:
+  # TestAgent 主应用 - 生产优化
+  testagent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: testagent:production
+    container_name: testagent-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - REDIS_URL=redis://redis:6379/0
+      - VECTOR_DB_PATH=/app/data/vectordb
+      - LOG_FILE=/app/logs/testagent.log
+      - WORKERS=4
+      - MAX_CONNECTIONS=1000
+      - KEEP_ALIVE=2
+    volumes:
+      - testagent_data:/app/data
+      - testagent_logs:/app/logs
+      - testagent_config:/app/config
+      - testagent_backups:/app/backups
+    depends_on:
+      - redis
+      - chroma
+    networks:
+      - testagent-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+        max_failure_ratio: 0.3
+      rollback_config:
+        parallelism: 1
+        delay: 0s
+        failure_action: pause
+        monitor: 60s
+        max_failure_ratio: 0.3
+
+  # Redis 集群配置
+  redis-master:
+    image: redis:7-alpine
+    container_name: testagent-redis-master
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_master_data:/data
+      - ./config/redis-master.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - testagent-network
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  redis-replica:
+    image: redis:7-alpine
+    container_name: testagent-redis-replica
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_replica_data:/data
+      - ./config/redis-replica.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - testagent-network
+    command: redis-server /usr/local/etc/redis/redis.conf
+    depends_on:
+      - redis-master
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # Redis Sentinel 高可用
+  redis-sentinel:
+    image: redis:7-alpine
+    container_name: testagent-redis-sentinel
+    restart: unless-stopped
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./config/sentinel.conf:/usr/local/etc/redis/sentinel.conf:ro
+    networks:
+      - testagent-network
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+      - redis-replica
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.2'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+
+  # ChromaDB 集群配置
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: testagent-chroma
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+      - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"]
+      - CHROMA_SERVER_THREAD_POOL_SIZE=8
+      - CHROMA_SERVER_MAX_BATCH_SIZE=1000
+    volumes:
+      - chroma_data:/chroma/chroma
+    networks:
+      - testagent-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+
+  # Nginx 负载均衡器
+  nginx:
+    image: nginx:alpine
+    container_name: testagent-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - testagent
+    networks:
+      - testagent-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # HAProxy 负载均衡器 (备选)
+  haproxy:
+    image: haproxy:alpine
+    container_name: testagent-haproxy
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./ssl:/etc/ssl:ro
+    depends_on:
+      - testagent
+    networks:
+      - testagent-network
+    profiles:
+      - haproxy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+
+  # Prometheus 监控 - 生产配置
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: testagent-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.prod.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    networks:
+      - testagent-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+      - '--storage.tsdb.wal-compression'
+      - '--storage.tsdb.min-block-duration=2h'
+      - '--storage.tsdb.max-block-duration=24h'
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # Grafana 可视化 - 生产配置
+  grafana:
+    image: grafana/grafana:latest
+    container_name: testagent-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/grafana_admin_password
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_SECURITY_COOKIE_SECURE=true
+      - GF_SECURITY_COOKIE_SAMESITE=strict
+      - GF_SERVER_ROOT_URL=https://grafana.example.com
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - testagent-network
+    depends_on:
+      - prometheus
+    secrets:
+      - grafana_admin_password
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # AlertManager 告警管理
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: testagent-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager.prod.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    networks:
+      - testagent-network
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=https://alertmanager.example.com'
+      - '--cluster.listen-address=0.0.0.0:9094'
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Loki 日志聚合 - 生产配置
+  loki:
+    image: grafana/loki:latest
+    container_name: testagent-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki.prod.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    networks:
+      - testagent-network
+    command: -config.file=/etc/loki/local-config.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # 数据备份服务
+  backup:
+    image: alpine:latest
+    container_name: testagent-backup
+    restart: unless-stopped
+    volumes:
+      - testagent_data:/backup/data:ro
+      - testagent_logs:/backup/logs:ro
+      - redis_master_data:/backup/redis:ro
+      - chroma_data:/backup/chroma:ro
+      - ./scripts/backup.sh:/backup.sh:ro
+      - backup_storage:/backups
+    networks:
+      - testagent-network
+    command: sh -c "apk add --no-cache curl && crond -f"
+    environment:
+      - BACKUP_SCHEDULE=0 2 * * *  # 每天凌晨2点备份
+      - BACKUP_RETENTION_DAYS=30
+    profiles:
+      - backup
+
+# 网络配置
+networks:
+  testagent-network:
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# 数据卷配置
+volumes:
+  testagent_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/data
+  testagent_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/logs
+  testagent_config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/config
+  testagent_backups:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/backups
+  redis_master_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/redis/master
+  redis_replica_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/redis/replica
+  chroma_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/chroma
+  nginx_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/nginx/logs
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/prometheus
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/grafana
+  alertmanager_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/alertmanager
+  loki_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/loki
+  backup_storage:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/testagent/backups
+
+# 密钥配置
+secrets:
+  grafana_admin_password:
+    file: ./secrets/grafana_admin_password.txt

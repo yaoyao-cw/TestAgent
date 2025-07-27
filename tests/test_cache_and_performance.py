@@ -13,13 +13,16 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.cache.cache_manager import (CacheEntry, CacheManager, MemoryCache,
-                                     cache)
+from src.cache.cache_manager import CacheEntry, CacheManager, MemoryCache, cache
 from src.cache.llm_cache import LLMCache
 from src.cache.rag_cache import RAGCache
-from src.performance.optimizer import (ConcurrencyManager, MemoryManager,
-                                       PerformanceConfig, PerformanceOptimizer,
-                                       ResourceMonitor)
+from src.performance.optimizer import (
+    ConcurrencyManager,
+    MemoryManager,
+    PerformanceConfig,
+    PerformanceOptimizer,
+    ResourceMonitor,
+)
 
 
 class TestMemoryCache:

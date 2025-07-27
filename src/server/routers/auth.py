@@ -11,9 +11,14 @@ from fastapi.security import HTTPBearer
 from pydantic import BaseModel, EmailStr
 
 from ...config.logging_config import get_logger
-from ...security.auth import (AuthenticationManager, JWTAuthenticator,
-                              Permission, UserRole, get_auth_manager,
-                              get_jwt_authenticator)
+from ...security.auth import (
+    AuthenticationManager,
+    JWTAuthenticator,
+    Permission,
+    UserRole,
+    get_auth_manager,
+    get_jwt_authenticator,
+)
 from ...security.input_validator import get_input_validator
 from ...security.rate_limiter import get_rate_limiter
 

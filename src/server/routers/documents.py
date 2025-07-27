@@ -10,8 +10,7 @@ from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 import aiofiles
-from fastapi import (APIRouter, Depends, File, Form, HTTPException, Query,
-                     UploadFile)
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 

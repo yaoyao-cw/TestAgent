@@ -10,8 +10,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from src.exceptions import WorkflowException
-from src.graph.workflow import (TestAgentWorkflow, execute_workflow,
-                                get_workflow)
+from src.graph.workflow import TestAgentWorkflow, execute_workflow, get_workflow
 from src.graph.workflow_manager import WorkflowManager, get_workflow_manager
 from src.models.state import TestAgentState
 from src.models.types import TaskType

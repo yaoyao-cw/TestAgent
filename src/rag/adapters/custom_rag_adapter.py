@@ -10,8 +10,13 @@ import aiohttp
 
 from ...config.logging_config import get_logger
 from ...exceptions import RAGServiceException
-from ..interfaces import (Document, RAGServiceInterface, RAGServiceStatus,
-                          SearchResult, ServiceHealthInfo)
+from ..interfaces import (
+    Document,
+    RAGServiceInterface,
+    RAGServiceStatus,
+    SearchResult,
+    ServiceHealthInfo,
+)
 
 logger = get_logger("custom_rag_adapter")
 

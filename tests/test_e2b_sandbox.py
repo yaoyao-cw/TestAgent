@@ -11,8 +11,7 @@ import pytest
 
 from src.tools.e2b_sandbox import E2B_AVAILABLE, E2BSandboxExecutor
 from src.tools.fallback_sandbox import FallbackSandboxExecutor
-from src.tools.unified_sandbox import (UnifiedSandboxExecutor,
-                                       execute_code_safely)
+from src.tools.unified_sandbox import UnifiedSandboxExecutor, execute_code_safely
 
 
 class TestE2BSandboxExecutor:

@@ -10,9 +10,14 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.tools.constraint_decoder import ConstraintDecoder
+
 # 直接导入需要测试的模块
-from src.tools.state_machine import (AgentState, ToolCallMode, ToolDefinition,
-                                     ToolStateMachine)
+from src.tools.state_machine import (
+    AgentState,
+    ToolCallMode,
+    ToolDefinition,
+    ToolStateMachine,
+)
 
 
 def test_tool_state_machine_basic():

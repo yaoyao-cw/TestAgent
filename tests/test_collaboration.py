@@ -9,14 +9,14 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from src.collaboration.auto_accept_manager import (AutoAcceptCondition,
-                                                   AutoAcceptManager,
-                                                   AutoAcceptMode)
-from src.collaboration.content_optimizer import (ContentOptimizer,
-                                                 OptimizationSuggestion)
+from src.collaboration.auto_accept_manager import (
+    AutoAcceptCondition,
+    AutoAcceptManager,
+    AutoAcceptMode,
+)
+from src.collaboration.content_optimizer import ContentOptimizer, OptimizationSuggestion
 from src.collaboration.feedback_processor import FeedbackProcessor
-from src.collaboration.plan_reviewer import (PlanReviewer, ReviewFeedback,
-                                             ReviewStatus)
+from src.collaboration.plan_reviewer import PlanReviewer, ReviewFeedback, ReviewStatus
 from src.collaboration.report_editor import EditOperation, ReportEditor
 from src.exceptions import TestAgentException
 from src.models.execution import ExecutionPlan, ExecutionStep

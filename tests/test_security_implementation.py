@@ -14,8 +14,7 @@ from src.security.audit_logger import SecurityAuditLogger
 from src.security.auth import JWTAuthenticator, UserRole
 from src.security.data_encryption import DataEncryption, SensitiveDataMasker
 from src.security.input_validator import InputValidator
-from src.security.malicious_code_detector import (MaliciousCodeDetector,
-                                                  ThreatLevel)
+from src.security.malicious_code_detector import MaliciousCodeDetector, ThreatLevel
 from src.security.rate_limiter import RateLimit, RateLimiter
 from src.security.sandbox_security import ResourceLimit, SandboxSecurityManager
 
@@ -28,7 +27,9 @@ class TestMaliciousCodeDetector:
 
     def test_detect_sql_injection(self):
         """测试SQL注入检测"""
-        malicious_code = "import os; os.system('SELECT * FROM users WHERE id = 1 OR 1=1')"
+        malicious_code = (
+            "import os; os.system('SELECT * FROM users WHERE id = 1 OR 1=1')"
+        )
         threats = self.detector.detect_threats(malicious_code)
 
         assert len(threats) > 0

@@ -4,18 +4,31 @@
 Tester、Coder、Executor、Reviewer、Reporter和Human智能体。
 """
 
-from .agent_factory import (AgentFactory, AgentWorkflow, create_agent,
-                            create_workflow, get_agent_factory, list_agents)
+from .agent_factory import (
+    AgentFactory,
+    AgentWorkflow,
+    create_agent,
+    create_workflow,
+    get_agent_factory,
+    list_agents,
+)
 from .coder import CoderAgent, create_coder_agent
 from .coordinator import CoordinatorAgent, create_coordinator_agent
 from .executor import ExecutorAgent, create_executor_agent
-from .human import (HumanAgent, create_human_agent, request_human_approval,
-                    request_human_decision, request_human_review)
+from .human import (
+    HumanAgent,
+    create_human_agent,
+    request_human_approval,
+    request_human_decision,
+    request_human_review,
+)
 from .planner import PlannerAgent, create_planner_agent
-from .quality_assurance import (QualityAssuranceWorkflow,
-                                TestCaseQualityChecker,
-                                TestScriptQualityChecker,
-                                get_quality_assurance_workflow)
+from .quality_assurance import (
+    QualityAssuranceWorkflow,
+    TestCaseQualityChecker,
+    TestScriptQualityChecker,
+    get_quality_assurance_workflow,
+)
 from .reporter import ReporterAgent, create_reporter_agent
 from .reviewer import ReviewerAgent, create_reviewer_agent
 from .test_team import TestTeamRouter, create_test_team_router

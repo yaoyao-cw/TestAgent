@@ -12,8 +12,12 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..config.logging_config import get_logger
-from ..models.review import (RequirementReview, ReviewScore, TestCaseReview,
-                             TestScriptReview)
+from ..models.review import (
+    RequirementReview,
+    ReviewScore,
+    TestCaseReview,
+    TestScriptReview,
+)
 
 logger = get_logger("quality_assurance")
 

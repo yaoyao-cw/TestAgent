@@ -12,8 +12,12 @@ from pydantic import BaseModel, Field
 try:
     from ...config.logging_config import get_logger
     from ...core.error_handler import get_error_handler
-    from ...core.monitoring import (get_health_checker, get_metrics_collector,
-                                    get_profiler, get_system_monitor)
+    from ...core.monitoring import (
+        get_health_checker,
+        get_metrics_collector,
+        get_profiler,
+        get_system_monitor,
+    )
 except ImportError as e:
     # 如果导入失败，提供模拟实现
     def get_metrics_collector():

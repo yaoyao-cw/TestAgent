@@ -11,8 +11,7 @@ from pydantic import BaseModel
 
 from ..config.logging_config import get_logger
 from .config_loader import get_service_config_loader
-from .external_service_manager import (ServiceStatus,
-                                       get_external_service_manager)
+from .external_service_manager import ServiceStatus, get_external_service_manager
 
 logger = get_logger("service_api")
 

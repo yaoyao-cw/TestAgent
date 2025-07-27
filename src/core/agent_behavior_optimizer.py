@@ -15,8 +15,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from ..config.logging_config import get_logger
 from ..models.workspace import GlobalState
-from .error_recovery_manager import (ErrorContext, ErrorRecoveryManager,
-                                     ErrorType)
+from .error_recovery_manager import ErrorContext, ErrorRecoveryManager, ErrorType
 
 logger = get_logger("agent_behavior_optimizer")
 

@@ -5,12 +5,18 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.agents.human import (HumanAgent, InterventionPriority,
-                              InterventionType, create_human_agent)
-from src.agents.quality_assurance import (QualityAssuranceWorkflow,
-                                          TestCaseQualityChecker,
-                                          TestScriptQualityChecker,
-                                          get_quality_assurance_workflow)
+from src.agents.human import (
+    HumanAgent,
+    InterventionPriority,
+    InterventionType,
+    create_human_agent,
+)
+from src.agents.quality_assurance import (
+    QualityAssuranceWorkflow,
+    TestCaseQualityChecker,
+    TestScriptQualityChecker,
+    get_quality_assurance_workflow,
+)
 from src.agents.reporter import ReporterAgent, create_reporter_agent
 from src.agents.reviewer import ReviewerAgent, create_reviewer_agent
 from src.core.base_agent import AgentInput

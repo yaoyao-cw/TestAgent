@@ -13,8 +13,13 @@ from typing import Any, Callable, Dict, List, Optional
 from ..config.logging_config import get_logger
 from ..exceptions import ToolException
 from .constraint_decoder import ConstraintDecoder, get_constraint_decoder
-from .state_machine import (AgentState, ToolCallMode, ToolDefinition,
-                            ToolStateMachine, get_tool_state_machine)
+from .state_machine import (
+    AgentState,
+    ToolCallMode,
+    ToolDefinition,
+    ToolStateMachine,
+    get_tool_state_machine,
+)
 from .tool_manager import ToolConfig, ToolManager
 
 logger = get_logger("enhanced_tool_manager")

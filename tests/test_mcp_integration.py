@@ -13,8 +13,7 @@ import pytest
 
 from src.exceptions import MCPIntegrationException
 from src.mcp.client import MCPClient, create_mcp_client
-from src.mcp.config import (MCPConfig, MCPServerConfig, load_mcp_config,
-                            save_mcp_config)
+from src.mcp.config import MCPConfig, MCPServerConfig, load_mcp_config, save_mcp_config
 from src.mcp.server_manager import MCPServerManager
 from src.mcp.sse_client import MCPSSEClient
 from src.mcp.tool_adapter import MCPToolAdapter

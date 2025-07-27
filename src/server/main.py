@@ -21,15 +21,30 @@ from ..config.logging_config import get_logger
 from ..config.settings import get_settings
 from ..core import initialize_core_systems, shutdown_core_systems
 from ..core.exceptions import TestAgentException
-from ..performance import (initialize_performance_system,
-                           shutdown_performance_system)
-from ..security.security_manager import (initialize_security_system,
-                                         shutdown_security_system)
-from .middleware import (AuthenticationMiddleware, InputValidationMiddleware,
-                         LoggingMiddleware, RateLimitMiddleware,
-                         SecurityMiddleware)
-from .routers import (auth, cache, collaboration, config, documents,
-                      monitoring, security, system, tasks, websocket)
+from ..performance import initialize_performance_system, shutdown_performance_system
+from ..security.security_manager import (
+    initialize_security_system,
+    shutdown_security_system,
+)
+from .middleware import (
+    AuthenticationMiddleware,
+    InputValidationMiddleware,
+    LoggingMiddleware,
+    RateLimitMiddleware,
+    SecurityMiddleware,
+)
+from .routers import (
+    auth,
+    cache,
+    collaboration,
+    config,
+    documents,
+    monitoring,
+    security,
+    system,
+    tasks,
+    websocket,
+)
 
 logger = get_logger("api_server")
 

@@ -13,8 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from ..models.types import AgentType, TaskType
-from ..models.workspace import (FileReference, FileType, TaskMetadata,
-                                TaskStatus)
+from ..models.workspace import FileReference, FileType, TaskMetadata, TaskStatus
 
 
 class FileNamingManager:

@@ -12,9 +12,16 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type, Union
 
-from .exceptions import (ConfigurationError, ErrorCategory, ErrorSeverity,
-                         NetworkError, ProcessingError, ResourceError,
-                         TestAgentException, TimeoutError)
+from .exceptions import (
+    ConfigurationError,
+    ErrorCategory,
+    ErrorSeverity,
+    NetworkError,
+    ProcessingError,
+    ResourceError,
+    TestAgentException,
+    TimeoutError,
+)
 
 logger = logging.getLogger("error_handler")
 

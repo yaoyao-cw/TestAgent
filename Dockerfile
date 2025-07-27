@@ -1,16 +1,35 @@
-# TestAgent Dockerfile - 多阶段构建
+# TestAgent Dockerfile - 多阶段多架构构建
+# 支持 linux/amd64, linux/arm64, linux/arm/v7
+
 # 构建阶段
-FROM python:3.11-slim as builder
+FROM --platform=$BUILDPLATFORM python:3.11-slim as builder
+
+# 构建参数
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
 
 # 设置工作目录
 WORKDIR /app
 
-# 安装系统依赖
+# 根据目标架构安装系统依赖
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
+    pkg-config \
+    && if [ "$TARGETARCH" = "arm64" ] || [ "$TARGETARCH" = "arm" ]; then \
+        apt-get install -y gcc-aarch64-linux-gnu || apt-get install -y gcc-arm-linux-gnueabihf; \
+    fi \
     && rm -rf /var/lib/apt/lists/*
+
+# 设置交叉编译环境变量
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        export CC=aarch64-linux-gnu-gcc; \
+    elif [ "$TARGETARCH" = "arm" ]; then \
+        export CC=arm-linux-gnueabihf-gcc; \
+    fi
 
 # 复制依赖文件
 COPY requirements.txt .
@@ -25,7 +44,12 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 生产阶段
-FROM python:3.11-slim as production
+FROM --platform=$TARGETPLATFORM python:3.11-slim as production
+
+# 构建参数
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
 
 # 设置环境变量
 ENV PYTHONUNBUFFERED=1
@@ -38,7 +62,13 @@ RUN groupadd -r testagent && useradd -r -g testagent testagent
 # 安装运行时依赖
 RUN apt-get update && apt-get install -y \
     curl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# 添加平台信息标签
+LABEL platform=$TARGETPLATFORM
+LABEL architecture=$TARGETARCH
+LABEL os=$TARGETOS
 
 # 从构建阶段复制虚拟环境
 COPY --from=builder /opt/venv /opt/venv

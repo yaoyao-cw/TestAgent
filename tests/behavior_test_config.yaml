@@ -1,0 +1,144 @@
+# 智能体行为测试配置文件
+
+# 质量阈值配置
+quality_thresholds:
+  reasoning:
+    min_clarity: 0.6          # 推理清晰度最低要求
+    min_logic: 0.6            # 逻辑性最低要求
+    min_relevance: 0.7        # 相关性最低要求
+    min_completeness: 0.5     # 完整性最低要求
+    min_depth_score: 0.6      # 推理深度最低要求
+  
+  action:
+    min_appropriateness: 0.7  # 动作适当性最低要求
+    min_efficiency: 0.6       # 效率最低要求
+    min_success_rate: 0.8     # 成功率最低要求
+    min_effectiveness: 0.6    # 有效性最低要求
+  
+  observation:
+    min_informativeness: 0.6  # 信息量最低要求
+    min_accuracy: 0.7         # 准确性最低要求
+    min_actionability: 0.5    # 可操作性最低要求
+    min_insight_score: 0.5    # 洞察力最低要求
+
+# 性能阈值配置
+performance_thresholds:
+  max_execution_time: 10.0    # 最大执行时间(秒)
+  max_iterations: 5           # 最大ReAct迭代次数
+  max_memory_usage: 100000    # 最大内存使用(字符数)
+  max_error_rate: 0.2         # 最大错误率
+
+# 回归检测配置
+regression_detection:
+  change_threshold: 0.1       # 变化阈值(10%)
+  severity_levels:
+    minor:
+      max_degraded_metrics: 2
+      max_degradation_ratio: 0.15
+    major:
+      max_degraded_metrics: 4
+      max_degradation_ratio: 0.25
+    critical:
+      max_degraded_metrics: 5
+      max_degradation_ratio: 0.35
+
+# 测试场景配置
+test_scenarios:
+  tester_agent:
+    - name: "test_case_generation"
+      input_data:
+        test_requirements: "用户登录功能测试"
+      expected_actions:
+        - "read_requirements"
+        - "generate_test_cases"
+        - "create_mindmap"
+        - "update_todo"
+      quality_criteria:
+        min_reasoning_clarity: 0.7
+        min_action_appropriateness: 0.8
+        min_observation_informativeness: 0.6
+    
+    - name: "complex_testing_scenario"
+      input_data:
+        test_requirements: "电商系统完整测试流程"
+      expected_actions:
+        - "read_requirements"
+        - "analyze_coverage"
+        - "generate_test_cases"
+        - "create_mindmap"
+      quality_criteria:
+        min_reasoning_clarity: 0.8
+        min_action_appropriateness: 0.9
+        min_observation_informativeness: 0.7
+
+  coder_agent:
+    - name: "test_script_generation"
+      input_data:
+        test_cases:
+          - scenario: "用户正常登录"
+            steps: "输入用户名密码"
+            expected: "登录成功"
+      expected_actions:
+        - "analyze_test_cases"
+        - "generate_test_script"
+        - "validate_code"
+        - "optimize_code"
+      quality_criteria:
+        min_reasoning_logic: 0.7
+        min_action_efficiency: 0.8
+        min_observation_accuracy: 0.7
+    
+    - name: "complex_code_generation"
+      input_data:
+        test_cases:
+          - scenario: "API接口测试"
+            steps: "发送HTTP请求"
+            expected: "返回正确响应"
+          - scenario: "数据库操作测试"
+            steps: "执行SQL查询"
+            expected: "返回预期数据"
+      expected_actions:
+        - "analyze_test_cases"
+        - "generate_test_script"
+        - "validate_code"
+        - "create_test_suite"
+      quality_criteria:
+        min_reasoning_logic: 0.8
+        min_action_efficiency: 0.9
+        min_observation_accuracy: 0.8
+
+# 基线数据配置
+baseline_config:
+  auto_update: false          # 是否自动更新基线
+  backup_count: 5             # 保留的基线备份数量
+  comparison_window: 10       # 比较窗口大小(最近N次测试)
+
+# 监控配置
+monitoring:
+  enable_real_time: true      # 启用实时监控
+  metrics_retention_days: 30  # 指标保留天数
+  alert_thresholds:
+    critical_regression: 0.3  # 严重回归阈值
+    performance_degradation: 0.2  # 性能退化阈值
+
+# 报告配置
+reporting:
+  generate_html: true         # 生成HTML报告
+  generate_json: true         # 生成JSON报告
+  include_charts: true        # 包含图表
+  detailed_analysis: true     # 详细分析
+
+# 测试环境配置
+test_environment:
+  mock_llm_responses: true    # 使用模拟LLM响应
+  timeout_seconds: 30         # 测试超时时间
+  retry_count: 3              # 重试次数
+  parallel_execution: false   # 并行执行(暂不支持)
+
+# 日志配置
+logging:
+  level: "INFO"               # 日志级别
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "behavior_test.log"   # 日志文件
+  max_size_mb: 10             # 最大日志文件大小
+  backup_count: 3             # 日志备份数量

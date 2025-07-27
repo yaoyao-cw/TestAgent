@@ -4,11 +4,21 @@ import pytest
 from pydantic import ValidationError
 
 from src.models.execution import ExecutionPlan, ExecutionStep
-from src.models.review import (RequirementReview, ReviewScore, TestCaseReview,
-                               TestScriptReview)
-from src.models.state import (TestAgentState, add_observation, add_resource,
-                              create_initial_state, get_completion_percentage,
-                              get_task_context, is_task_completed)
+from src.models.review import (
+    RequirementReview,
+    ReviewScore,
+    TestCaseReview,
+    TestScriptReview,
+)
+from src.models.state import (
+    TestAgentState,
+    add_observation,
+    add_resource,
+    create_initial_state,
+    get_completion_percentage,
+    get_task_context,
+    is_task_completed,
+)
 from src.models.types import StepType, TaskType
 
 

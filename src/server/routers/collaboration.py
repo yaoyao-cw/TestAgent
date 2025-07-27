@@ -9,8 +9,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from ...collaboration.auto_accept_manager import (AutoAcceptMode,
-                                                  get_auto_accept_manager)
+from ...collaboration.auto_accept_manager import AutoAcceptMode, get_auto_accept_manager
 from ...collaboration.feedback_processor import get_feedback_processor
 from ...collaboration.plan_reviewer import ReviewStatus, get_plan_reviewer
 from ...config.logging_config import get_logger

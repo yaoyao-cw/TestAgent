@@ -5,8 +5,13 @@ from unittest.mock import Mock
 import pytest
 
 from src.core.agent_router import AgentRouter, Message, RoutingRule
-from src.core.base_agent import (AgentInput, AgentOutput, BaseAgent,
-                                 ReActAgent, SimpleAgent)
+from src.core.base_agent import (
+    AgentInput,
+    AgentOutput,
+    BaseAgent,
+    ReActAgent,
+    SimpleAgent,
+)
 from src.models.types import AgentType
 from src.models.workspace import GlobalState, WorkspaceState
 

@@ -1,0 +1,166 @@
+# TestAgent Prometheus 告警规则
+groups:
+  - name: testagent.rules
+    rules:
+      # 服务可用性告警
+      - alert: TestAgentDown
+        expr: up{job="testagent"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "TestAgent服务不可用"
+          description: "TestAgent服务已停止响应超过1分钟"
+
+      - alert: TestAgentHighErrorRate
+        expr: rate(testagent_http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TestAgent错误率过高"
+          description: "TestAgent 5xx错误率超过10%，当前值: {{ $value }}"
+
+      # 性能告警
+      - alert: TestAgentHighResponseTime
+        expr: histogram_quantile(0.95, rate(testagent_http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TestAgent响应时间过长"
+          description: "TestAgent 95%响应时间超过2秒，当前值: {{ $value }}秒"
+
+      - alert: TestAgentHighMemoryUsage
+        expr: (testagent_memory_usage_bytes / testagent_memory_limit_bytes) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TestAgent内存使用率过高"
+          description: "TestAgent内存使用率超过80%，当前值: {{ $value }}%"
+
+      - alert: TestAgentHighCPUUsage
+        expr: rate(testagent_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TestAgent CPU使用率过高"
+          description: "TestAgent CPU使用率超过80%，当前值: {{ $value }}%"
+
+      # 任务执行告警
+      - alert: TestAgentTaskFailureRate
+        expr: rate(testagent_tasks_failed_total[5m]) / rate(testagent_tasks_total[5m]) > 0.2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TestAgent任务失败率过高"
+          description: "TestAgent任务失败率超过20%，当前值: {{ $value }}"
+
+      - alert: TestAgentLongRunningTask
+        expr: testagent_task_duration_seconds > 3600
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TestAgent任务执行时间过长"
+          description: "任务 {{ $labels.task_id }} 执行时间超过1小时"
+
+      # 队列告警
+      - alert: TestAgentQueueBacklog
+        expr: testagent_queue_size > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TestAgent队列积压"
+          description: "任务队列积压超过100个任务，当前值: {{ $value }}"
+
+  - name: redis.rules
+    rules:
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis服务不可用"
+          description: "Redis服务已停止响应超过1分钟"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis内存使用率过高"
+          description: "Redis内存使用率超过90%，当前值: {{ $value }}%"
+
+      - alert: RedisHighConnections
+        expr: redis_connected_clients > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis连接数过高"
+          description: "Redis连接数超过100，当前值: {{ $value }}"
+
+  - name: chroma.rules
+    rules:
+      - alert: ChromaDBDown
+        expr: up{job="chroma"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "ChromaDB服务不可用"
+          description: "ChromaDB服务已停止响应超过1分钟"
+
+      - alert: ChromaDBHighQueryLatency
+        expr: histogram_quantile(0.95, rate(chroma_query_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ChromaDB查询延迟过高"
+          description: "ChromaDB 95%查询延迟超过5秒，当前值: {{ $value }}秒"
+
+  - name: system.rules
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "系统CPU使用率过高"
+          description: "实例 {{ $labels.instance }} CPU使用率超过80%，当前值: {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "系统内存使用率过高"
+          description: "实例 {{ $labels.instance }} 内存使用率超过80%，当前值: {{ $value }}%"
+
+      - alert: DiskSpaceLow
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "磁盘空间不足"
+          description: "实例 {{ $labels.instance }} 磁盘使用率超过85%，当前值: {{ $value }}%"
+
+      - alert: HighDiskIOWait
+        expr: irate(node_cpu_seconds_total{mode="iowait"}[5m]) * 100 > 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "磁盘IO等待时间过高"
+          description: "实例 {{ $labels.instance }} IO等待时间超过20%，当前值: {{ $value }}%"

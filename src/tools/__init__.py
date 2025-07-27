@@ -9,23 +9,32 @@ def get_python_repl():
 
 
 def get_document_retrieval_tool():
-    from .document_retrieval import (DocumentRetrievalTool,
-                                     document_search_tool, keyword_search_tool)
+    from .document_retrieval import (
+        DocumentRetrievalTool,
+        document_search_tool,
+        keyword_search_tool,
+    )
 
     return DocumentRetrievalTool, document_search_tool, keyword_search_tool
 
 
 def get_web_search_tool():
-    from .web_search import (WebSearchTool, web_search_tool,
-                             webpage_content_tool)
+    from .web_search import WebSearchTool, web_search_tool, webpage_content_tool
 
     return WebSearchTool, web_search_tool, webpage_content_tool
 
 
 def get_decorators():
-    from .decorators import (cache_result, get_tool_info, get_tool_metrics,
-                             get_tool_registry, list_available_tools,
-                             rate_limit, tool, validate_input)
+    from .decorators import (
+        cache_result,
+        get_tool_info,
+        get_tool_metrics,
+        get_tool_registry,
+        list_available_tools,
+        rate_limit,
+        tool,
+        validate_input,
+    )
 
     return (
         tool,
@@ -51,25 +60,47 @@ def get_mcp_tools():
     return MCPToolAdapter, get_mcp_adapter
 
 
-from .constraint_decoder import (ConstraintDecoder, TokenConstraint,
-                                 apply_tool_constraints,
-                                 get_constraint_decoder, get_tool_call_prefill)
-from .decorators import (cache_result, get_tool_info, get_tool_metrics,
-                         get_tool_registry, list_available_tools, rate_limit,
-                         tool, validate_input)
-from .enhanced_tool_manager import (EnhancedToolManager, ToolExecutionContext,
-                                    execute_tool_with_context,
-                                    get_available_tools_for_current_context,
-                                    get_enhanced_tool_manager,
-                                    get_llm_constraint_config,
-                                    set_tool_context)
+from .constraint_decoder import (
+    ConstraintDecoder,
+    TokenConstraint,
+    apply_tool_constraints,
+    get_constraint_decoder,
+    get_tool_call_prefill,
+)
+from .decorators import (
+    cache_result,
+    get_tool_info,
+    get_tool_metrics,
+    get_tool_registry,
+    list_available_tools,
+    rate_limit,
+    tool,
+    validate_input,
+)
+from .enhanced_tool_manager import (
+    EnhancedToolManager,
+    ToolExecutionContext,
+    execute_tool_with_context,
+    get_available_tools_for_current_context,
+    get_enhanced_tool_manager,
+    get_llm_constraint_config,
+    set_tool_context,
+)
+
 # 直接导入不依赖其他模块的组件
 from .python_repl import PythonREPL
+
 # 工具状态机和约束解码组件
-from .state_machine import (AgentState, ToolCallMode, ToolDefinition,
-                            ToolStateMachine, get_available_tools_for_agent,
-                            get_constraint_config_for_llm,
-                            get_tool_state_machine, set_agent_state)
+from .state_machine import (
+    AgentState,
+    ToolCallMode,
+    ToolDefinition,
+    ToolStateMachine,
+    get_available_tools_for_agent,
+    get_constraint_config_for_llm,
+    get_tool_state_machine,
+    set_agent_state,
+)
 from .tool_manager import ToolManager, get_tool_manager
 
 __all__ = [

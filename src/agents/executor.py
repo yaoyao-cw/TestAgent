@@ -21,8 +21,7 @@ from ..llm.service import get_llm_service
 from ..models.types import AgentType, TaskType
 from ..models.workspace import FileType, GlobalState
 from ..tools.python_repl_final import PythonREPLTool
-from ..tools.unified_sandbox import (SandboxExecutionResult,
-                                     UnifiedSandboxExecutor)
+from ..tools.unified_sandbox import SandboxExecutionResult, UnifiedSandboxExecutor
 
 logger = get_logger("executor_agent")
 

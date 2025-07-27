@@ -14,13 +14,15 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from ..config.logging_config import get_logger
 from ..config.settings import get_settings
 from .config_loader import get_service_config_loader
-from .health_monitor import (HealthStatus, ServiceHealthMonitor,
-                             get_health_monitor)
-from .litellm_service import (LiteLLMConfig, LiteLLMService,
-                              initialize_litellm_service)
+from .health_monitor import HealthStatus, ServiceHealthMonitor, get_health_monitor
+from .litellm_service import LiteLLMConfig, LiteLLMService, initialize_litellm_service
 from .redis_service import RedisConfig, RedisService, initialize_redis_service
-from .service_registry import (ServicePriority, ServiceRegistry, ServiceType,
-                               get_service_registry)
+from .service_registry import (
+    ServicePriority,
+    ServiceRegistry,
+    ServiceType,
+    get_service_registry,
+)
 
 logger = get_logger("external_service_manager")
 

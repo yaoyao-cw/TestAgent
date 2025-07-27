@@ -18,9 +18,18 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 from ..config.logging_config import get_logger
 from ..models.workspace import GlobalState
 from .error_handler import ErrorHandler
-from .exceptions import (ConfigurationError, ErrorCategory, ErrorSeverity,
-                         LLMError, MCPError, NetworkError, RAGError,
-                         ResourceError, TestAgentException, TimeoutError)
+from .exceptions import (
+    ConfigurationError,
+    ErrorCategory,
+    ErrorSeverity,
+    LLMError,
+    MCPError,
+    NetworkError,
+    RAGError,
+    ResourceError,
+    TestAgentException,
+    TimeoutError,
+)
 from .recovery import RecoveryAction, RecoveryStrategy, ServiceLevel
 
 logger = get_logger("error_recovery_manager")

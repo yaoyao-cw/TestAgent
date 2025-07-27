@@ -11,17 +11,23 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.core.agent_behavior_optimizer import (AgentBehaviorOptimizer,
-                                               AttentionGuide, BehaviorPattern,
-                                               ContextDiversityInjection,
-                                               get_behavior_optimizer,
-                                               reset_behavior_optimizer)
-from src.core.error_recovery_manager import (ContextPreservationLevel,
-                                             ErrorContext,
-                                             ErrorRecoveryManager, ErrorType,
-                                             RecoveryPlan,
-                                             get_error_recovery_manager,
-                                             reset_error_recovery_manager)
+from src.core.agent_behavior_optimizer import (
+    AgentBehaviorOptimizer,
+    AttentionGuide,
+    BehaviorPattern,
+    ContextDiversityInjection,
+    get_behavior_optimizer,
+    reset_behavior_optimizer,
+)
+from src.core.error_recovery_manager import (
+    ContextPreservationLevel,
+    ErrorContext,
+    ErrorRecoveryManager,
+    ErrorType,
+    RecoveryPlan,
+    get_error_recovery_manager,
+    reset_error_recovery_manager,
+)
 from src.core.exceptions import LLMError, NetworkError, TimeoutError
 from src.models.workspace import GlobalState
 

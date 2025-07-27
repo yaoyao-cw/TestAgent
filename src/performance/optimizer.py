@@ -12,8 +12,7 @@ import multiprocessing
 import threading
 import time
 import weakref
-from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
-                                as_completed)
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from functools import lru_cache, wraps
