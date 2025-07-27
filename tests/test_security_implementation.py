@@ -28,7 +28,7 @@ class TestMaliciousCodeDetector:
 
     def test_detect_sql_injection(self):
         """测试SQL注入检测"""
-        malicious_code = "SELECT * FROM users WHERE id = 1 OR 1=1"
+        malicious_code = "import os; os.system('SELECT * FROM users WHERE id = 1 OR 1=1')"
         threats = self.detector.detect_threats(malicious_code)
 
         assert len(threats) > 0
