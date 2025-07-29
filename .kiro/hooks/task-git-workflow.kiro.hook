@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "任务Git工作流自动化",
+  "description": "当创建新的task.md文件时自动创建feature分支，完成子任务时推送到远程feature分支，任务完成后合并到develop分支",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "data/tasks/task.md",
+      "data/tasks/*/task.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检测到task.md文件变化。请分析任务状态并执行相应的Git操作：\n\n1. 如果是新创建的task.md文件：\n   - 从任务文件中提取任务名称和描述\n   - 创建新的feature分支，命名格式：feature/task-{任务名称简化}\n   - 切换到该分支并进行初始提交\n\n2. 如果是任务文件更新（子任务完成）：\n   - 检查任务完成状态\n   - 将当前更改提交到feature分支\n   - 推送到远程feature分支\n   - 提交信息格式：feat(task): 完成子任务 - {子任务描述}\n\n3. 如果任务完全完成（包括测试和文档）：\n   - 确保所有测试通过：python -m pytest tests/ -v\n   - 确保代码质量检查通过：python -m black src/ tests/ && python -m flake8 src/ tests/\n   - 切换到develop分支并拉取最新代码\n   - 合并feature分支到develop分支\n   - 推送到远程develop分支\n   - 删除本地和远程的feature分支\n   - 提交信息格式：feat: 完成任务 - {任务名称}\n\n请根据当前task.md文件的内容和状态，执行相应的Git操作。"
+  }
+}

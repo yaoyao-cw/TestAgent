@@ -9,10 +9,7 @@
 - 日志配置
 """
 
-from .settings import (
-    TestAgentSettings,
-    get_settings
-)
+from .settings import TestAgentSettings, get_settings
 
 # from .manager import (
 #     ConfigManager,
@@ -46,14 +43,13 @@ from .logging_config import (
     create_file_handler,
     LoggingManager,
     get_logging_manager,
-    init_logging
+    init_logging,
 )
 
 __all__ = [
     # Settings
     "TestAgentSettings",
     "get_settings",
-    
     # Logging
     "setup_logging",
     "get_logger",
@@ -61,7 +57,7 @@ __all__ = [
     "create_file_handler",
     "LoggingManager",
     "get_logging_manager",
-    "init_logging"
+    "init_logging",
 ]
 
 
@@ -70,15 +66,16 @@ def initialize_config_system():
     try:
         # 初始化日志系统
         from .logging_config import get_logging_manager
+
         logging_manager = get_logging_manager()
         logging_manager.initialize()
-        
+
         # 基本配置系统已初始化
         logger = get_logger("config_init")
         logger.info("配置系统初始化完成")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"配置系统初始化失败: {e}")
         return False
@@ -86,6 +83,7 @@ def initialize_config_system():
 
 # 自动初始化配置系统
 _initialized = False
+
 
 def ensure_initialized():
     """确保配置系统已初始化"""

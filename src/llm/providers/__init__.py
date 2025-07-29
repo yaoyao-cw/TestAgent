@@ -12,7 +12,7 @@ from .baichuan_provider import BaichuanProvider
 
 __all__ = [
     "BaseLLMProvider",
-    "OpenAIProvider", 
+    "OpenAIProvider",
     "AnthropicProvider",
     "DeepSeekProvider",
     "QwenProvider",

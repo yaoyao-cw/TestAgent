@@ -9,14 +9,16 @@ from typing import Optional
 
 class SimpleSettings:
     """简化的配置类"""
-    
+
     def __init__(self):
         # LLM配置
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         self.openai_base_url = os.getenv("OPENAI_BASE_URL")
-        
+
         # RAG配置
-        self.vector_db_persist_directory = os.getenv("VECTOR_DB_PATH", "./data/vectordb")
+        self.vector_db_persist_directory = os.getenv(
+            "VECTOR_DB_PATH", "./data/vectordb"
+        )
         self.embedding_model = os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002")
         self.chunk_size = int(os.getenv("CHUNK_SIZE", "1000"))
         self.chunk_overlap = int(os.getenv("CHUNK_OVERLAP", "200"))

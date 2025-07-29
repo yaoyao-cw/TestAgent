@@ -19,12 +19,13 @@ import threading
 
 logger = logging.getLogger("cache_manager")
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 @dataclass
 class CacheEntry:
     """缓存条目"""
+
     key: str
     value: Any
     created_at: datetime
@@ -146,7 +147,7 @@ class MemoryCache(CacheBackend):
                 value=value,
                 created_at=datetime.now(),
                 expires_at=expires_at,
-                size=size
+                size=size,
             )
 
             self._cache[key] = entry
@@ -183,6 +184,7 @@ class MemoryCache(CacheBackend):
     async def keys(self, pattern: str = "*") -> List[str]:
         """获取匹配的键列表"""
         import fnmatch
+
         with self._lock:
             # 清理过期条目
             expired_keys = [k for k, v in self._cache.items() if v.is_expired()]
@@ -206,8 +208,12 @@ class MemoryCache(CacheBackend):
                 "total_size": total_size,
                 "hits": self._hits,
                 "misses": self._misses,
-                "hit_rate": self._hits / (self._hits + self._misses) if (self._hits + self._misses) > 0 else 0,
-                "evictions": self._evictions
+                "hit_rate": (
+                    self._hits / (self._hits + self._misses)
+                    if (self._hits + self._misses) > 0
+                    else 0
+                ),
+                "evictions": self._evictions,
             }
 
     def _evict_lru(self):
@@ -235,6 +241,7 @@ class RedisCache(CacheBackend):
         if not self._connected:
             try:
                 import redis.asyncio as redis
+
                 self._redis = redis.from_url(self.redis_url, decode_responses=False)
                 await self._redis.ping()
                 self._connected = True
@@ -322,7 +329,8 @@ class RedisCache(CacheBackend):
                 "used_memory_human": info.get("used_memory_human", "0B"),
                 "keyspace_hits": info.get("keyspace_hits", 0),
                 "keyspace_misses": info.get("keyspace_misses", 0),
-                "hit_rate": info.get("keyspace_hits", 0) / (info.get("keyspace_hits", 0) + info.get("keyspace_misses", 1))
+                "hit_rate": info.get("keyspace_hits", 0)
+                / (info.get("keyspace_hits", 0) + info.get("keyspace_misses", 1)),
             }
         except Exception as e:
             logger.error(f"Error getting cache stats: {e}")
@@ -393,16 +401,15 @@ class CacheManager:
     def generate_key(self, *args, **kwargs) -> str:
         """生成缓存键"""
         # 创建一个包含所有参数的字符串
-        key_data = {
-            "args": args,
-            "kwargs": sorted(kwargs.items()) if kwargs else {}
-        }
+        key_data = {"args": args, "kwargs": sorted(kwargs.items()) if kwargs else {}}
         key_str = json.dumps(key_data, sort_keys=True, default=str)
-        
+
         # 生成哈希值作为键
         return hashlib.md5(key_str.encode()).hexdigest()
 
-    async def get_or_set(self, key: str, func: Callable, ttl: Optional[int] = None, *args, **kwargs) -> Any:
+    async def get_or_set(
+        self, key: str, func: Callable, ttl: Optional[int] = None, *args, **kwargs
+    ) -> Any:
         """获取缓存值，如果不存在则调用函数并缓存结果"""
         if not self._enabled:
             if asyncio.iscoroutinefunction(func):
@@ -437,41 +444,45 @@ def get_cache_manager() -> CacheManager:
         # 根据配置创建缓存后端
         try:
             from ..config.settings import get_settings
+
             settings = get_settings()
-            
+
             if settings.cache.redis_url:
                 backend = RedisCache(settings.cache.redis_url, settings.cache.ttl)
             else:
                 backend = MemoryCache(default_ttl=settings.cache.ttl)
-            
+
             _cache_manager = CacheManager(backend)
-            
+
             if not settings.cache.enabled:
                 _cache_manager.disable()
-                
+
         except Exception as e:
-            logger.warning(f"Failed to initialize cache from config, using memory cache: {e}")
+            logger.warning(
+                f"Failed to initialize cache from config, using memory cache: {e}"
+            )
             backend = MemoryCache()
             _cache_manager = CacheManager(backend)
-    
+
     return _cache_manager
 
 
 def cache(ttl: Optional[int] = None, key_func: Optional[Callable] = None):
     """缓存装饰器"""
+
     def decorator(func):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
             cache_manager = get_cache_manager()
-            
+
             # 生成缓存键
             if key_func:
                 cache_key = key_func(*args, **kwargs)
             else:
                 cache_key = f"{func.__module__}.{func.__name__}:{cache_manager.generate_key(*args, **kwargs)}"
-            
+
             return await cache_manager.get_or_set(cache_key, func, ttl, *args, **kwargs)
-        
+
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             # 对于同步函数，需要在事件循环中运行
@@ -481,12 +492,12 @@ def cache(ttl: Optional[int] = None, key_func: Optional[Callable] = None):
             except RuntimeError:
                 # 如果没有事件循环，直接调用函数
                 return func(*args, **kwargs)
-        
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
             return sync_wrapper
-    
+
     return decorator
 
 

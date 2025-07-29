@@ -8,7 +8,7 @@ from .review import ReviewScore, TestCaseReview, TestScriptReview, RequirementRe
 __all__ = [
     # 基础类型
     "TaskType",
-    "StepType", 
+    "StepType",
     "AgentType",
     "LLMType",
     # 状态模型
@@ -21,5 +21,5 @@ __all__ = [
     "ReviewScore",
     "TestCaseReview",
     "TestScriptReview",
-    "RequirementReview"
+    "RequirementReview",
 ]

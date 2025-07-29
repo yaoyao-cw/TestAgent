@@ -8,12 +8,12 @@ from .rag_service import RAGService
 
 __all__ = [
     "DocumentParser",
-    "TextSplitter", 
+    "TextSplitter",
     "SemanticTextSplitter",
     "TextChunk",
     "EmbeddingService",
     "VectorDatabase",
     "ChromaVectorDatabase",
     "SearchResult",
-    "RAGService"
+    "RAGService",
 ]

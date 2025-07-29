@@ -17,7 +17,7 @@ from .cache_manager import (
     CacheEntry,
     get_cache_manager,
     cache,
-    cache_key
+    cache_key,
 )
 
 from .llm_cache import (
@@ -26,7 +26,7 @@ from .llm_cache import (
     llm_cache,
     cache_llm_response,
     get_cached_llm_response,
-    clear_llm_cache
+    clear_llm_cache,
 )
 
 from .rag_cache import (
@@ -37,20 +37,19 @@ from .rag_cache import (
     cache_retrieval_result,
     get_cached_retrieval,
     cache_vector_result,
-    get_cached_vector_result
+    get_cached_vector_result,
 )
 
 __all__ = [
     # Cache Manager
     "CacheBackend",
-    "MemoryCache", 
+    "MemoryCache",
     "RedisCache",
     "CacheManager",
     "CacheEntry",
     "get_cache_manager",
     "cache",
     "cache_key",
-    
     # LLM Cache
     "LLMCache",
     "get_llm_cache",
@@ -58,7 +57,6 @@ __all__ = [
     "cache_llm_response",
     "get_cached_llm_response",
     "clear_llm_cache",
-    
     # RAG Cache
     "RAGCache",
     "get_rag_cache",
@@ -67,31 +65,32 @@ __all__ = [
     "cache_retrieval_result",
     "get_cached_retrieval",
     "cache_vector_result",
-    "get_cached_vector_result"
+    "get_cached_vector_result",
 ]
 
 
 def initialize_cache_system():
     """初始化缓存系统"""
     import logging
+
     logger = logging.getLogger("cache_init")
-    
+
     try:
         # 初始化缓存管理器
         cache_manager = get_cache_manager()
         logger.info("Cache manager initialized")
-        
+
         # 初始化LLM缓存
         llm_cache = get_llm_cache()
         logger.info("LLM cache initialized")
-        
+
         # 初始化RAG缓存
         rag_cache = get_rag_cache()
         logger.info("RAG cache initialized")
-        
+
         logger.info("Cache system initialized successfully")
         return True
-        
+
     except Exception as e:
         logger.error(f"Failed to initialize cache system: {e}")
         return False
@@ -100,12 +99,13 @@ def initialize_cache_system():
 def shutdown_cache_system():
     """关闭缓存系统"""
     import logging
+
     logger = logging.getLogger("cache_shutdown")
-    
+
     try:
         # 这里可以添加缓存系统的清理逻辑
         logger.info("Cache system shutdown completed")
-        
+
     except Exception as e:
         logger.error(f"Error during cache system shutdown: {e}")
 
