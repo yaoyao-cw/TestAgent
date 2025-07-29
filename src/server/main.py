@@ -156,9 +156,13 @@ def create_app() -> FastAPI:
 def setup_middleware(app: FastAPI, settings):
     """配置中间件"""
     # CORS中间件
+    cors_origins = settings.api.cors_origins if hasattr(settings, "api") else ["*"]
+    if not cors_origins:
+        cors_origins = ["*"]
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

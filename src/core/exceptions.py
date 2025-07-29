@@ -98,7 +98,14 @@ class NetworkError(TestAgentException):
     """网络错误"""
 
     def __init__(
-        self, message: str, url: str = None, status_code: int = None, **kwargs
+        self,
+        message: str,
+        url: str = None,
+        status_code: int = None,
+        network_error_type: str = None,
+        response_time: float = None,
+        retry_count: int = 0,
+        **kwargs,
     ):
         super().__init__(
             message,
@@ -110,6 +117,103 @@ class NetworkError(TestAgentException):
             self.details["url"] = url
         if status_code:
             self.details["status_code"] = status_code
+        if network_error_type:
+            self.details["network_error_type"] = network_error_type
+        if response_time:
+            self.details["response_time"] = response_time
+        if retry_count:
+            self.details["retry_count"] = retry_count
+
+
+class ConnectionTimeoutError(NetworkError):
+    """连接超时错误"""
+
+    def __init__(self, message: str, timeout_seconds: float = None, **kwargs):
+        super().__init__(
+            message,
+            network_error_type="connection_timeout",
+            severity=ErrorSeverity.HIGH,
+            **kwargs,
+        )
+        if timeout_seconds:
+            self.details["timeout_seconds"] = timeout_seconds
+        self.suggestions.extend(
+            [
+                "检查网络连接是否正常",
+                "确认目标服务是否可用",
+                "尝试增加连接超时时间",
+                "检查防火墙设置",
+            ]
+        )
+
+
+class DNSResolutionError(NetworkError):
+    """DNS解析错误"""
+
+    def __init__(self, message: str, domain: str = None, **kwargs):
+        super().__init__(
+            message,
+            network_error_type="dns_resolution",
+            severity=ErrorSeverity.HIGH,
+            **kwargs,
+        )
+        if domain:
+            self.details["domain"] = domain
+        self.suggestions.extend(
+            [
+                "检查域名是否正确",
+                "确认DNS服务器设置",
+                "尝试使用其他DNS服务器",
+                "检查网络连接",
+            ]
+        )
+
+
+class HTTPError(NetworkError):
+    """HTTP错误"""
+
+    def __init__(
+        self, message: str, status_code: int, response_text: str = None, **kwargs
+    ):
+        super().__init__(
+            message, status_code=status_code, network_error_type="http_error", **kwargs
+        )
+        if response_text:
+            self.details["response_text"] = response_text[:500]  # 限制长度
+
+        # 根据状态码设置严重程度和建议
+        if 400 <= status_code < 500:
+            self.severity = ErrorSeverity.MEDIUM
+            self.suggestions.extend(
+                ["检查请求参数是否正确", "确认API端点路径", "验证认证信息"]
+            )
+        elif 500 <= status_code < 600:
+            self.severity = ErrorSeverity.HIGH
+            self.suggestions.extend(
+                ["服务器内部错误，请稍后重试", "联系系统管理员", "检查服务器状态"]
+            )
+
+
+class ServiceUnavailableError(NetworkError):
+    """服务不可用错误"""
+
+    def __init__(self, message: str, service_name: str = None, **kwargs):
+        super().__init__(
+            message,
+            network_error_type="service_unavailable",
+            severity=ErrorSeverity.CRITICAL,
+            **kwargs,
+        )
+        if service_name:
+            self.details["service_name"] = service_name
+        self.suggestions.extend(
+            [
+                "检查服务是否正在运行",
+                "确认服务配置是否正确",
+                "查看服务日志获取更多信息",
+                "尝试重启服务",
+            ]
+        )
 
 
 class AuthenticationError(TestAgentException):
@@ -270,6 +374,13 @@ ERROR_CODE_MAP = {
     "NETWORK_001": "网络连接失败",
     "NETWORK_002": "请求超时",
     "NETWORK_003": "HTTP错误响应",
+    "NETWORK_004": "DNS解析失败",
+    "NETWORK_005": "连接被拒绝",
+    "NETWORK_006": "SSL证书验证失败",
+    "NETWORK_007": "代理服务器错误",
+    "NETWORK_008": "网络不可达",
+    "NETWORK_009": "连接重置",
+    "NETWORK_010": "服务不可用",
     "AUTH_001": "API密钥无效或缺失",
     "AUTH_002": "认证失败",
     "AUTH_003": "权限不足",

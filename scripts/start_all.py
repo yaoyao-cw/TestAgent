@@ -29,75 +29,139 @@ def print_banner():
 
 
 def find_node_npm_paths():
-    """查找Node.js和npm的路径"""
+    """查找Node.js和npm的路径（跨平台兼容）"""
     node_path = None
     npm_path = None
 
-    # 常见的Node.js安装路径
-    possible_paths = [
-        # nvm路径
-        os.path.expanduser("~/.nvm/versions/node/v18.20.7/bin"),
-        os.path.expanduser("~/.nvm/versions/node/*/bin"),
-        # 系统路径
-        "/usr/bin",
-        "/usr/local/bin",
-        # 其他可能的路径
-        "/opt/node/bin",
-    ]
-
-    # 首先尝试直接调用（如果在PATH中）
+    # 首先尝试直接执行命令来验证是否在PATH中
     try:
         result = subprocess.run(
-            ["which", "node"], capture_output=True, text=True, timeout=5
+            ["node", "--version"], capture_output=True, text=True, timeout=5
         )
         if result.returncode == 0:
-            node_path = result.stdout.strip()
+            # 如果可以直接执行，就使用命令名
+            node_path = "node"
     except:
         pass
 
+    # 对于 npm，在 Windows 上需要特殊处理
     try:
-        result = subprocess.run(
-            ["which", "npm"], capture_output=True, text=True, timeout=5
-        )
+        if os.name == "nt":  # Windows
+            # 在 Windows 上，npm 可能是 .ps1 脚本，需要通过 PowerShell 执行
+            result = subprocess.run(
+                ["powershell", "-Command", "npm --version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+        else:
+            result = subprocess.run(
+                ["npm", "--version"], capture_output=True, text=True, timeout=5
+            )
+
         if result.returncode == 0:
-            npm_path = result.stdout.strip()
+            # 如果可以直接执行，就使用命令名
+            npm_path = "npm"
     except:
         pass
 
-    # 如果直接调用失败，尝试在常见路径中查找
+    # 如果直接执行成功，就不需要查找具体路径了
+    if node_path and npm_path:
+        return node_path, npm_path
+
+    # 如果直接执行失败，尝试使用which/where命令查找路径
+    if os.name == "nt":  # Windows
+        node_exe = "node.exe"
+        npm_exe = "npm.cmd"
+        which_cmd = "where"
+    else:  # Unix/Linux/macOS
+        node_exe = "node"
+        npm_exe = "npm"
+        which_cmd = "which"
+
+    if not node_path:
+        try:
+            result = subprocess.run(
+                [which_cmd, "node"], capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                node_path = result.stdout.strip().split("\n")[0]
+        except:
+            pass
+
+    if not npm_path:
+        try:
+            result = subprocess.run(
+                [which_cmd, "npm"], capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                npm_path = result.stdout.strip().split("\n")[0]
+        except:
+            pass
+
+    # 如果还是找不到，尝试在常见路径中查找
     if not node_path or not npm_path:
         import glob
+
+        # 根据操作系统定义可能的安装路径
+        if os.name == "nt":  # Windows
+            possible_paths = [
+                # Node.js官方安装路径
+                "C:/Program Files/nodejs",
+                "C:/Program Files (x86)/nodejs",
+                # nvm-windows路径
+                os.path.expanduser("~/AppData/Roaming/nvm/*/"),
+                # Chocolatey路径
+                "C:/ProgramData/chocolatey/lib/nodejs/tools",
+                # Scoop路径
+                os.path.expanduser("~/scoop/apps/nodejs/current"),
+                # 用户本地安装
+                os.path.expanduser("~/nodejs"),
+            ]
+        else:  # Unix/Linux/macOS
+            possible_paths = [
+                # nvm路径
+                os.path.expanduser("~/.nvm/versions/node/*/bin"),
+                # 系统路径
+                "/usr/bin",
+                "/usr/local/bin",
+                # Homebrew路径 (macOS)
+                "/opt/homebrew/bin",
+                "/usr/local/Cellar/node/*/bin",
+                # 其他可能的路径
+                "/opt/node/bin",
+                os.path.expanduser("~/node/bin"),
+            ]
 
         for path_pattern in possible_paths:
             if "*" in path_pattern:
                 # 处理通配符路径
-                for expanded_path in glob.glob(path_pattern):
-                    if not node_path and os.path.exists(
-                        os.path.join(expanded_path, "node")
-                    ):
-                        node_path = os.path.join(expanded_path, "node")
-                    if not npm_path and os.path.exists(
-                        os.path.join(expanded_path, "npm")
-                    ):
-                        npm_path = os.path.join(expanded_path, "npm")
+                try:
+                    for expanded_path in glob.glob(path_pattern):
+                        if not node_path and os.path.exists(
+                            os.path.join(expanded_path, node_exe)
+                        ):
+                            node_path = os.path.join(expanded_path, node_exe)
+                        if not npm_path and os.path.exists(
+                            os.path.join(expanded_path, npm_exe)
+                        ):
+                            npm_path = os.path.join(expanded_path, npm_exe)
+                except:
+                    continue
             else:
-                if not node_path and os.path.exists(os.path.join(path_pattern, "node")):
-                    node_path = os.path.join(path_pattern, "node")
-                if not npm_path and os.path.exists(os.path.join(path_pattern, "npm")):
-                    npm_path = os.path.join(path_pattern, "npm")
+                if not node_path and os.path.exists(
+                    os.path.join(path_pattern, node_exe)
+                ):
+                    node_path = os.path.join(path_pattern, node_exe)
+                if not npm_path and os.path.exists(os.path.join(path_pattern, npm_exe)):
+                    npm_path = os.path.join(path_pattern, npm_exe)
 
     return node_path, npm_path
 
 
 def check_dependencies():
-    """检查依赖"""
-    print("🔍 检查依赖...")
-
-    # 检查Python
-    if sys.version_info < (3, 9):
-        print("❌ Python版本过低，需要Python 3.9+")
-        return False
-    print("✅ Python版本:", sys.version.split()[0])
+    """检查Node.js和npm依赖"""
+    print("🔍 检查Node.js依赖...")
 
     # 查找Node.js和npm路径
     node_path, npm_path = find_node_npm_paths()
@@ -105,9 +169,17 @@ def check_dependencies():
     # 检查Node.js
     if node_path:
         try:
-            result = subprocess.run(
-                [node_path, "--version"], capture_output=True, text=True, timeout=5
-            )
+            if node_path == "node":
+                # 直接使用命令名
+                result = subprocess.run(
+                    ["node", "--version"], capture_output=True, text=True, timeout=5
+                )
+            else:
+                # 使用完整路径
+                result = subprocess.run(
+                    [node_path, "--version"], capture_output=True, text=True, timeout=5
+                )
+
             if result.returncode == 0:
                 node_version = result.stdout.strip()
                 print(f"✅ Node.js版本: {node_version} (路径: {node_path})")
@@ -118,16 +190,37 @@ def check_dependencies():
             print(f"❌ Node.js检查失败: {e}")
             return False
     else:
-        print("❌ 未找到Node.js，请确保已安装Node.js")
-        print("💡 提示: 如果使用nvm，请确保已激活Node.js版本")
+        print("❌ 未找到Node.js")
+        print("💡 提示: 请安装Node.js以启用前端服务")
+        print("   - 下载地址: https://nodejs.org/")
+        if os.name != "nt":
+            print(
+                "   - 或使用nvm: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash"
+            )
         return False
 
     # 检查npm
     if npm_path:
         try:
-            result = subprocess.run(
-                [npm_path, "--version"], capture_output=True, text=True, timeout=5
-            )
+            if npm_path == "npm":
+                # 直接使用命令名，在Windows上通过PowerShell执行
+                if os.name == "nt":
+                    result = subprocess.run(
+                        ["powershell", "-Command", "npm --version"],
+                        capture_output=True,
+                        text=True,
+                        timeout=5,
+                    )
+                else:
+                    result = subprocess.run(
+                        ["npm", "--version"], capture_output=True, text=True, timeout=5
+                    )
+            else:
+                # 使用完整路径
+                result = subprocess.run(
+                    [npm_path, "--version"], capture_output=True, text=True, timeout=5
+                )
+
             if result.returncode == 0:
                 npm_version = result.stdout.strip()
                 print(f"✅ npm版本: {npm_version} (路径: {npm_path})")
@@ -138,7 +231,7 @@ def check_dependencies():
             print(f"❌ npm检查失败: {e}")
             return False
     else:
-        print("❌ 未找到npm，请确保已安装npm")
+        print("❌ 未找到npm")
         return False
 
     # 将找到的路径存储为全局变量，供后续使用
@@ -167,25 +260,51 @@ def setup_backend():
         pip_path = venv_path / "bin" / "pip"
         python_path = venv_path / "bin" / "python"
 
-    # 只安装核心依赖
-    print("安装核心Python依赖...")
-    core_deps = [
-        "fastapi>=0.104.0",
-        "uvicorn[standard]>=0.24.0",
-        "pydantic>=2.5.0",
-        "pydantic-settings>=2.0.0",
-        "python-dotenv>=1.0.0",
-        "PyYAML>=6.0.0",
-    ]
+    # 检查并安装依赖
+    print("检查Python依赖...")
+    requirements_file = PROJECT_ROOT / "requirements.txt"
 
-    try:
-        subprocess.run([str(pip_path), "install"] + core_deps, check=True, timeout=300)
-        print("✅ 核心依赖安装完成")
-    except subprocess.TimeoutExpired:
-        print("⚠️ 依赖安装超时，尝试使用系统Python")
-        python_path = sys.executable
-    except subprocess.CalledProcessError as e:
-        print(f"⚠️ 依赖安装失败: {e}, 尝试使用系统Python")
+    if requirements_file.exists():
+        print("安装完整项目依赖...")
+        try:
+            # 先升级pip
+            subprocess.run(
+                [str(pip_path), "install", "--upgrade", "pip"], check=True, timeout=120
+            )
+
+            # 安装项目依赖
+            subprocess.run(
+                [str(pip_path), "install", "-r", str(requirements_file)],
+                check=True,
+                timeout=600,
+            )  # 10分钟超时
+            print("✅ 项目依赖安装完成")
+        except subprocess.TimeoutExpired:
+            print("⚠️ 依赖安装超时，尝试安装核心依赖")
+            # 回退到核心依赖
+            core_deps = [
+                "fastapi>=0.104.0",
+                "uvicorn[standard]>=0.24.0",
+                "pydantic>=2.5.0",
+                "pydantic-settings>=2.0.0",
+                "python-dotenv>=1.0.0",
+                "PyYAML>=6.0.0",
+                "aiofiles>=23.0.0",
+                "requests>=2.31.0",
+            ]
+            try:
+                subprocess.run(
+                    [str(pip_path), "install"] + core_deps, check=True, timeout=300
+                )
+                print("✅ 核心依赖安装完成")
+            except Exception as e:
+                print(f"⚠️ 核心依赖安装失败: {e}, 使用系统Python")
+                python_path = sys.executable
+        except subprocess.CalledProcessError as e:
+            print(f"⚠️ 依赖安装失败: {e}, 尝试使用系统Python")
+            python_path = sys.executable
+    else:
+        print("⚠️ requirements.txt不存在，跳过依赖安装")
         python_path = sys.executable
 
     # 创建必要的目录
@@ -280,11 +399,15 @@ def setup_frontend():
     node_modules = frontend_path / "node_modules"
     if not node_modules.exists():
         print("安装前端依赖...")
-        # 使用之前找到的npm路径
         try:
-            subprocess.run(
-                [FOUND_NPM_PATH, "install"], cwd=frontend_path, check=True, timeout=300
-            )
+            # 构建 npm install 命令
+            if os.name == "nt" and FOUND_NPM_PATH == "npm":
+                # Windows 上使用 PowerShell 执行 npm
+                cmd = ["powershell", "-Command", "npm install"]
+            else:
+                cmd = [FOUND_NPM_PATH, "install"]
+
+            subprocess.run(cmd, cwd=frontend_path, check=True, timeout=300)
             print("✅ 前端依赖安装完成")
         except subprocess.TimeoutExpired:
             print("⚠️ 前端依赖安装超时")
@@ -305,41 +428,45 @@ def start_backend(python_path):
     """启动后端服务"""
     print("\n🔧 启动后端服务...")
 
-    # 优先使用简化版本
-    simple_script = PROJECT_ROOT / "run_simple_server.py"
-    api_script = PROJECT_ROOT / "run_api_server.py"
-
-    if simple_script.exists():
-        print("使用简化版API服务器...")
-        script_to_use = simple_script
-    elif api_script.exists():
-        print("使用完整版API服务器...")
-        script_to_use = api_script
-    else:
-        print("❌ API服务器脚本不存在")
-        return None
+    # 直接使用uvicorn启动服务器，避免复杂的导入问题
+    print("使用uvicorn直接启动API服务器...")
 
     # 启动后端服务
-    backend_process = subprocess.Popen(
-        [str(python_path), str(script_to_use)], cwd=PROJECT_ROOT
-    )
+    cmd = [
+        str(python_path),
+        "-m",
+        "uvicorn",
+        "src.server.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+    ]
+
+    # 设置环境变量
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(PROJECT_ROOT)
+
+    backend_process = subprocess.Popen(cmd, cwd=PROJECT_ROOT, env=env)
 
     # 等待后端服务启动
     print("等待后端服务启动...")
-    for i in range(30):  # 最多等待30秒
+    for i in range(60):  # 等待60秒
         try:
             import requests
 
-            response = requests.get("http://localhost:8000/health", timeout=1)
+            response = requests.get("http://localhost:8000/health", timeout=2)
             if response.status_code == 200:
                 print("✅ 后端服务启动成功")
                 return backend_process
         except:
             pass
         time.sleep(1)
-        print(f"等待中... ({i+1}/30)")
+        if i % 10 == 9:  # 每10秒显示一次进度
+            print(f"等待中... ({i+1}/60)")
 
-    print("❌ 后端服务启动超时")
+    print("❌ 后端服务启动超时，但进程可能仍在运行")
     return backend_process
 
 
@@ -349,11 +476,15 @@ def start_frontend():
 
     frontend_path = PROJECT_ROOT / "frontend"
 
-    # 使用之前找到的npm路径启动前端服务
     try:
-        frontend_process = subprocess.Popen(
-            [FOUND_NPM_PATH, "run", "dev"], cwd=frontend_path
-        )
+        # 构建 npm run dev 命令
+        if os.name == "nt" and FOUND_NPM_PATH == "npm":
+            # Windows 上使用 PowerShell 执行 npm
+            cmd = ["powershell", "-Command", "npm run dev"]
+        else:
+            cmd = [FOUND_NPM_PATH, "run", "dev"]
+
+        frontend_process = subprocess.Popen(cmd, cwd=frontend_path)
         print("✅ 前端服务启动中...")
         return frontend_process
     except Exception as e:
@@ -404,35 +535,73 @@ def main():
     print_banner()
 
     try:
-        # 检查依赖
-        if not check_dependencies():
-            print("\n❌ 依赖检查失败，请安装必要的依赖")
+        # 检查Python依赖
+        if sys.version_info < (3, 9):
+            print("❌ Python版本过低，需要Python 3.9+")
             sys.exit(1)
+        print("✅ Python版本:", sys.version.split()[0])
 
-        # 设置环境
+        # 设置后端环境
         python_path = setup_backend()
-        if not setup_frontend():
-            print("\n❌ 前端环境设置失败")
-            sys.exit(1)
 
-        # 启动服务
+        # 检查Node.js依赖
+        node_dependencies_ok = check_dependencies()
+
+        if node_dependencies_ok:
+            # 完整启动（后端 + 前端）
+            if not setup_frontend():
+                print("\n⚠️ 前端环境设置失败，仅启动后端服务")
+                node_dependencies_ok = False
+
+        # 启动后端服务
         backend_process = start_backend(python_path)
         if not backend_process:
             print("\n❌ 后端服务启动失败")
             sys.exit(1)
 
-        frontend_process = start_frontend()
-        if not frontend_process:
-            print("\n❌ 前端服务启动失败")
-            backend_process.terminate()
-            sys.exit(1)
+        frontend_process = None
+        if node_dependencies_ok:
+            # 尝试启动前端服务
+            frontend_process = start_frontend()
+            if not frontend_process:
+                print("\n⚠️ 前端服务启动失败，仅运行后端服务")
 
         # 等待服务运行
-        wait_for_services(backend_process, frontend_process)
+        if frontend_process:
+            wait_for_services(backend_process, frontend_process)
+        else:
+            wait_for_backend_only(backend_process)
 
     except Exception as e:
         print(f"\n❌ 启动失败: {e}")
         sys.exit(1)
+
+
+def wait_for_backend_only(backend_process):
+    """仅等待后端服务运行"""
+    print("\n🎉 后端服务启动完成！")
+    print("📖 访问地址:")
+    print("   - 后端API: http://localhost:8000")
+    print("   - API文档: http://localhost:8000/docs")
+    print("   - 健康检查: http://localhost:8000/health")
+    print("\n💡 提示: 安装Node.js后可启动完整的前后端服务")
+    print("\n按 Ctrl+C 停止服务")
+
+    try:
+        # 等待进程结束
+        while True:
+            if backend_process.poll() is not None:
+                print("❌ 后端服务已停止")
+                break
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n🛑 正在停止服务...")
+        try:
+            backend_process.terminate()
+            backend_process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            backend_process.kill()
+        print("✅ 后端服务已停止")
 
 
 if __name__ == "__main__":

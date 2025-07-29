@@ -10,7 +10,7 @@ from ..exceptions import MCPIntegrationException, ToolException
 from ..mcp import get_mcp_adapter, get_mcp_manager
 from .decorators import ToolRegistry, tool_registry
 from .document_retrieval import DocumentRetrievalTool
-from .python_repl import PythonREPL
+from .python_repl_final import PythonREPLTool as PythonREPL
 from .web_search import WebSearchTool
 from .workflow_tools import WorkflowTools
 

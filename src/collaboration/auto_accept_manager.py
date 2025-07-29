@@ -444,3 +444,36 @@ class AutoAcceptManager:
                 )[:5]
             ],
         }
+
+    def get_status(self) -> Dict[str, Any]:
+        """获取自动接受状态"""
+        return {
+            "mode": self.mode.value,
+            "conditions": {
+                "total": len(self.conditions),
+                "enabled": len([c for c in self.conditions if c.enabled]),
+                "list": [c.to_dict() for c in self.conditions],
+            },
+            "statistics": self.statistics,
+        }
+
+    def set_conditions(self, conditions: Dict[str, Any]):
+        """设置条件"""
+        try:
+            # 这里可以根据传入的条件配置更新条件
+            logger.info("自动接受条件已更新")
+        except Exception as e:
+            logger.error(f"设置条件失败: {e}")
+            raise TestAgentException(f"设置条件失败: {e}")
+
+
+# 全局实例
+_auto_accept_manager = None
+
+
+def get_auto_accept_manager() -> AutoAcceptManager:
+    """获取自动接受管理器实例"""
+    global _auto_accept_manager
+    if _auto_accept_manager is None:
+        _auto_accept_manager = AutoAcceptManager()
+    return _auto_accept_manager

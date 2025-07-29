@@ -81,18 +81,18 @@ class PlanReviewer:
     def submit_for_review(
         self,
         plan_id: str,
-        plan: ExecutionPlan,
-        task_type: TaskType,
-        context: Dict[str, Any] = None,
+        plan_data: Dict[str, Any],
+        task_type: str,
+        metadata: Dict[str, Any] = None,
         callback: Callable = None,
     ) -> str:
         """提交计划进行审查
 
         Args:
             plan_id: 计划ID
-            plan: 执行计划
+            plan_data: 计划数据
             task_type: 任务类型
-            context: 上下文信息
+            metadata: 元数据信息
             callback: 审查完成回调函数
 
         Returns:
@@ -103,12 +103,15 @@ class PlanReviewer:
 
             # 存储待审查的计划
             self.pending_reviews[review_id] = {
+                "review_id": review_id,
                 "plan_id": plan_id,
-                "plan": plan,
+                "plan_data": plan_data,
                 "task_type": task_type,
-                "context": context or {},
-                "submitted_at": datetime.now(),
-                "status": ReviewStatus.PENDING,
+                "metadata": metadata or {},
+                "submitted_at": datetime.now().isoformat(),
+                "status": ReviewStatus.PENDING.value,
+                "reviewed_at": None,
+                "reviewer_comment": None,
             }
 
             # 注册回调函数
@@ -399,3 +402,152 @@ class PlanReviewer:
             "modified": modified_count,
             "approval_rate": approved_count / total_reviews if total_reviews > 0 else 0,
         }
+
+    def list_reviews(
+        self, status_filter: Optional[str] = None, page: int = 1, page_size: int = 10
+    ) -> Dict[str, Any]:
+        """列出审查"""
+        try:
+            reviews = list(self.pending_reviews.values())
+
+            # 状态过滤
+            if status_filter:
+                reviews = [r for r in reviews if r["status"] == status_filter]
+
+            # 分页
+            total = len(reviews)
+            start = (page - 1) * page_size
+            end = start + page_size
+            reviews = reviews[start:end]
+
+            return {
+                "reviews": reviews,
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+            }
+
+        except Exception as e:
+            logger.error(f"列出审查失败: {e}")
+            raise TestAgentException(f"列出审查失败: {e}")
+
+    def get_review(self, review_id: str) -> Optional[Dict[str, Any]]:
+        """获取审查详情"""
+        return self.pending_reviews.get(review_id)
+
+    def approve_plan(
+        self,
+        review_id: str,
+        comment: Optional[str] = None,
+        modifications: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """批准计划"""
+        try:
+            if review_id not in self.pending_reviews:
+                return False
+
+            self.pending_reviews[review_id].update(
+                {
+                    "status": ReviewStatus.APPROVED.value,
+                    "reviewed_at": datetime.now().isoformat(),
+                    "reviewer_comment": comment,
+                }
+            )
+
+            if modifications:
+                self.pending_reviews[review_id]["modifications"] = modifications
+
+            logger.info(f"计划已批准: {review_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"批准计划失败: {e}")
+            return False
+
+    def reject_plan(
+        self,
+        review_id: str,
+        comment: str,
+        feedback: Optional[str] = None,
+        required_changes: Optional[List[str]] = None,
+    ) -> bool:
+        """拒绝计划"""
+        try:
+            if review_id not in self.pending_reviews:
+                return False
+
+            self.pending_reviews[review_id].update(
+                {
+                    "status": ReviewStatus.REJECTED.value,
+                    "reviewed_at": datetime.now().isoformat(),
+                    "reviewer_comment": comment,
+                    "feedback": feedback,
+                    "required_changes": required_changes or [],
+                }
+            )
+
+            logger.info(f"计划已拒绝: {review_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"拒绝计划失败: {e}")
+            return False
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """获取统计信息"""
+        try:
+            total = len(self.pending_reviews)
+            if total == 0:
+                return {
+                    "total": 0,
+                    "pending": 0,
+                    "approved": 0,
+                    "rejected": 0,
+                    "approval_rate": 0,
+                }
+
+            pending = sum(
+                1
+                for r in self.pending_reviews.values()
+                if r["status"] == ReviewStatus.PENDING.value
+            )
+            approved = sum(
+                1
+                for r in self.pending_reviews.values()
+                if r["status"] == ReviewStatus.APPROVED.value
+            )
+            rejected = sum(
+                1
+                for r in self.pending_reviews.values()
+                if r["status"] == ReviewStatus.REJECTED.value
+            )
+
+            return {
+                "total": total,
+                "pending": pending,
+                "approved": approved,
+                "rejected": rejected,
+                "approval_rate": approved / total if total > 0 else 0,
+            }
+
+        except Exception as e:
+            logger.error(f"获取统计信息失败: {e}")
+            return {
+                "total": 0,
+                "pending": 0,
+                "approved": 0,
+                "rejected": 0,
+                "approval_rate": 0,
+            }
+
+
+# 全局实例
+_plan_reviewer = None
+
+
+def get_plan_reviewer() -> PlanReviewer:
+    """获取计划审查器实例"""
+    global _plan_reviewer
+    if _plan_reviewer is None:
+        _plan_reviewer = PlanReviewer()
+    return _plan_reviewer

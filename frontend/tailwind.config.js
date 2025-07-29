@@ -7,6 +7,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // 添加必需的颜色变量
+        ring: '#3b82f6',
+        background: '#ffffff',
+        foreground: '#111827',
+        
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

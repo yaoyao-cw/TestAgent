@@ -37,6 +37,19 @@ from .startup import (
     shutdown_external_services,
     startup,
 )
+from .task_creation_monitor import TaskCreationMonitor, get_task_creation_monitor
+from .progress_tracker import ProgressTracker, get_progress_tracker
+from .task_status_notifier import (
+    TaskStatusNotifier,
+    NotificationChannel,
+    NotificationPriority,
+    UserNotificationPreferences,
+    get_task_status_notifier,
+)
+from .task_monitoring_integration import (
+    TaskMonitoringService,
+    get_task_monitoring_service,
+)
 
 __all__ = [
     # 健康监控
@@ -72,4 +85,16 @@ __all__ = [
     "shutdown_external_services",
     "startup",
     "shutdown",
+    # 任务监控
+    "TaskCreationMonitor",
+    "get_task_creation_monitor",
+    "ProgressTracker",
+    "get_progress_tracker",
+    "TaskStatusNotifier",
+    "NotificationChannel",
+    "NotificationPriority",
+    "UserNotificationPreferences",
+    "get_task_status_notifier",
+    "TaskMonitoringService",
+    "get_task_monitoring_service",
 ]

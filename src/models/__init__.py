@@ -13,6 +13,15 @@ from .workspace import (
     TaskStatus,
     WorkspaceState,
 )
+from .task_monitoring import (
+    TaskCreationStatus,
+    TaskCreationStep,
+    ProgressUpdate,
+    TaskCreationContext,
+    TaskCreationResult,
+    ServiceValidationResult,
+    TaskStatusNotification,
+)
 
 __all__ = [
     # 基础类型
@@ -39,4 +48,12 @@ __all__ = [
     "WorkspaceState",
     "TaskRecoveryInfo",
     "GlobalState",
+    # 任务监控模型
+    "TaskCreationStatus",
+    "TaskCreationStep",
+    "ProgressUpdate",
+    "TaskCreationContext",
+    "TaskCreationResult",
+    "ServiceValidationResult",
+    "TaskStatusNotification",
 ]

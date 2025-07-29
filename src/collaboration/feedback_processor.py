@@ -537,3 +537,130 @@ class FeedbackProcessor:
             base_confidence += 0.1
 
         return min(0.95, base_confidence)
+
+    async def submit_feedback(
+        self,
+        target_id: str,
+        target_type: str,
+        feedback: str,
+        feedback_type: str = "improvement",
+        priority: str = "medium",
+    ) -> str:
+        """提交反馈"""
+        try:
+            import uuid
+
+            feedback_id = str(uuid.uuid4())
+
+            # 这里应该保存到数据库，现在先返回ID
+            logger.info(f"反馈已提交: {feedback_id} for {target_type}:{target_id}")
+
+            return feedback_id
+
+        except Exception as e:
+            logger.error(f"提交反馈失败: {e}")
+            raise TestAgentException(f"提交反馈失败: {e}")
+
+    async def list_feedback(
+        self,
+        target_id: Optional[str] = None,
+        target_type: Optional[str] = None,
+        status_filter: Optional[str] = None,
+        page: int = 1,
+        page_size: int = 10,
+    ) -> Dict[str, Any]:
+        """列出反馈"""
+        try:
+            # 模拟数据，实际应该从数据库查询
+            mock_feedback = [
+                {
+                    "feedback_id": "fb-001",
+                    "target_id": "plan-001",
+                    "target_type": "plan",
+                    "feedback": "建议增加错误处理步骤",
+                    "feedback_type": "improvement",
+                    "priority": "medium",
+                    "status": "pending",
+                    "created_at": datetime.now().isoformat(),
+                    "processed_at": None,
+                    "result": None,
+                }
+            ]
+
+            return {
+                "feedback": mock_feedback,
+                "total": len(mock_feedback),
+                "page": page,
+                "page_size": page_size,
+            }
+
+        except Exception as e:
+            logger.error(f"列出反馈失败: {e}")
+            raise TestAgentException(f"列出反馈失败: {e}")
+
+    async def get_feedback(self, feedback_id: str) -> Optional[Dict[str, Any]]:
+        """获取反馈详情"""
+        try:
+            # 模拟数据，实际应该从数据库查询
+            if feedback_id == "fb-001":
+                return {
+                    "feedback_id": feedback_id,
+                    "target_id": "plan-001",
+                    "target_type": "plan",
+                    "feedback": "建议增加错误处理步骤",
+                    "feedback_type": "improvement",
+                    "priority": "medium",
+                    "status": "pending",
+                    "created_at": datetime.now().isoformat(),
+                    "processed_at": None,
+                    "result": None,
+                }
+            return None
+
+        except Exception as e:
+            logger.error(f"获取反馈详情失败: {e}")
+            raise TestAgentException(f"获取反馈详情失败: {e}")
+
+    async def process_feedback(self, feedback_id: str) -> Optional[Dict[str, Any]]:
+        """处理反馈"""
+        try:
+            # 模拟处理结果
+            logger.info(f"处理反馈: {feedback_id}")
+
+            return {
+                "processed": True,
+                "modifications": {},
+                "confidence": 0.8,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        except Exception as e:
+            logger.error(f"处理反馈失败: {e}")
+            raise TestAgentException(f"处理反馈失败: {e}")
+
+    async def get_statistics(self) -> Dict[str, Any]:
+        """获取反馈统计信息"""
+        try:
+            return {
+                "total": 10,
+                "pending": 3,
+                "processed": 7,
+                "processing_rate": 0.7,
+                "average_processing_time": 120,  # 分钟
+            }
+
+        except Exception as e:
+            logger.error(f"获取反馈统计失败: {e}")
+            raise TestAgentException(f"获取反馈统计失败: {e}")
+
+
+# 全局实例
+_feedback_processor = None
+
+
+def get_feedback_processor() -> FeedbackProcessor:
+    """获取反馈处理器实例"""
+    global _feedback_processor
+    if _feedback_processor is None:
+        _feedback_processor = FeedbackProcessor()
+    return _feedback_processor

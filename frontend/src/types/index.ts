@@ -309,3 +309,6 @@ export interface ApiError {
   code?: string
   details?: any
 }
+
+// 导出网络错误处理相关类型
+export * from './error'

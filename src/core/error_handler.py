@@ -9,8 +9,9 @@ import logging
 import sys
 import traceback
 from contextlib import contextmanager
+from datetime import datetime
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from .exceptions import (
     ConfigurationError,
@@ -22,6 +23,9 @@ from .exceptions import (
     TestAgentException,
     TimeoutError,
 )
+from .network_error_classifier import get_network_error_classifier
+from .error_notification_service import get_error_notification_service
+from .resilience import RetryManager, CircuitBreaker, get_retry_manager
 
 logger = logging.getLogger("error_handler")
 
@@ -37,6 +41,16 @@ class ErrorHandler:
         self.circuit_breaker_threshold = 5
         self.circuit_breaker_timeout = 300  # 5分钟
         self.circuit_breakers: Dict[str, Dict[str, Any]] = {}
+
+        # 新增组件
+        self.network_classifier = get_network_error_classifier()
+        self.notification_service = get_error_notification_service()
+        self.error_history: List[Dict[str, Any]] = []
+        self.max_history_size = 1000
+
+        # 集成新的弹性组件
+        self.retry_manager = get_retry_manager()
+        logger.info("错误处理器已集成重试管理器和熔断器组件")
 
     def register_error_callback(
         self, exception_type: Type[Exception], callback: Callable
@@ -56,29 +70,39 @@ class ErrorHandler:
         """处理错误"""
         context = context or {}
 
+        # 增强网络错误处理
+        processed_error = self._process_network_error(error, context)
+
         # 记录错误
-        error_info = self._log_error(error, context)
+        error_info = self._log_error(processed_error, context)
 
         # 更新错误统计
-        self._update_error_stats(error)
+        self._update_error_stats(processed_error)
 
         # 执行错误回调
-        self._execute_error_callback(error, context)
+        self._execute_error_callback(processed_error, context)
 
         # 尝试恢复
-        recovery_result = self._attempt_recovery(error, context)
+        recovery_result = self._attempt_recovery(processed_error, context)
+
+        # 发送用户通知
+        self._send_user_notification(processed_error, context)
+
+        # 记录到历史
+        self._add_to_history(processed_error, context, recovery_result)
 
         return {
             "error_info": error_info,
             "recovery_result": recovery_result,
             "context": context,
+            "processed_error": processed_error,
         }
 
     def _log_error(self, error: Exception, context: Dict[str, Any]) -> Dict[str, Any]:
         """记录错误信息"""
         error_info = {
-            "type": type(error).__name__,
-            "message": str(error),
+            "error_type": type(error).__name__,
+            "error_message": str(error),
             "traceback": traceback.format_exc(),
             "context": context,
         }
@@ -209,13 +233,290 @@ class ErrorHandler:
             }
             logger.info(f"Circuit breaker reset for service: {service}")
 
+    def _process_network_error(
+        self, error: Exception, context: Dict[str, Any]
+    ) -> Exception:
+        """处理网络错误，进行智能分类"""
+        import requests.exceptions as req_exc
+
+        # 检查是否是网络相关错误
+        if isinstance(error, (req_exc.RequestException, ConnectionError, TimeoutError)):
+            try:
+                # 使用网络错误分类器创建更详细的异常
+                classified_error = self.network_classifier.create_network_exception(
+                    error, context
+                )
+                logger.info(
+                    f"Network error classified as: {classified_error.__class__.__name__}"
+                )
+                return classified_error
+            except Exception as e:
+                logger.warning(f"Failed to classify network error: {e}")
+                return error
+
+        return error
+
+    def _send_user_notification(self, error: Exception, context: Dict[str, Any]):
+        """发送用户通知"""
+        if isinstance(error, TestAgentException):
+            try:
+                user_id = context.get("user_id", "anonymous")
+                # 异步发送通知（这里简化为同步调用）
+                import asyncio
+
+                try:
+                    loop = asyncio.get_event_loop()
+                    loop.create_task(
+                        self.notification_service.notify_user(error, user_id, context)
+                    )
+                except RuntimeError:
+                    # 如果没有事件循环，创建一个新的
+                    asyncio.run(
+                        self.notification_service.notify_user(error, user_id, context)
+                    )
+            except Exception as e:
+                logger.error(f"Failed to send user notification: {e}")
+
+    def _add_to_history(
+        self, error: Exception, context: Dict[str, Any], recovery_result: Dict[str, Any]
+    ):
+        """添加到错误历史"""
+        history_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "error_type": error.__class__.__name__,
+            "error_message": str(error),
+            "context": context,
+            "recovery_attempted": recovery_result.get("recovered", False),
+            "recovery_strategy": recovery_result.get("strategy"),
+        }
+
+        if isinstance(error, TestAgentException):
+            history_entry.update(
+                {
+                    "error_code": error.error_code,
+                    "category": error.category.value,
+                    "severity": error.severity.value,
+                }
+            )
+
+        self.error_history.append(history_entry)
+
+        # 限制历史记录大小
+        if len(self.error_history) > self.max_history_size:
+            self.error_history = self.error_history[-self.max_history_size :]
+
     def get_error_stats(self) -> Dict[str, Any]:
         """获取错误统计信息"""
-        return {
+        from datetime import datetime, timedelta
+
+        # 基础统计
+        stats = {
             "error_count": self.error_count.copy(),
             "circuit_breakers": self.circuit_breakers.copy(),
             "total_errors": sum(self.error_count.values()),
+            "history_size": len(self.error_history),
         }
+
+        # 最近24小时的错误统计
+        if self.error_history:
+            recent_cutoff = datetime.now() - timedelta(hours=24)
+            recent_errors = [
+                entry
+                for entry in self.error_history
+                if datetime.fromisoformat(entry["timestamp"]) > recent_cutoff
+            ]
+
+            stats["recent_24h"] = {
+                "total": len(recent_errors),
+                "by_type": {},
+                "by_severity": {},
+                "recovery_rate": 0,
+            }
+
+            # 按类型统计
+            for entry in recent_errors:
+                error_type = entry["error_type"]
+                stats["recent_24h"]["by_type"][error_type] = (
+                    stats["recent_24h"]["by_type"].get(error_type, 0) + 1
+                )
+
+            # 按严重程度统计
+            for entry in recent_errors:
+                severity = entry.get("severity", "unknown")
+                stats["recent_24h"]["by_severity"][severity] = (
+                    stats["recent_24h"]["by_severity"].get(severity, 0) + 1
+                )
+
+            # 恢复成功率
+            recovered_count = sum(
+                1 for entry in recent_errors if entry.get("recovery_attempted")
+            )
+            if recent_errors:
+                stats["recent_24h"]["recovery_rate"] = recovered_count / len(
+                    recent_errors
+                )
+
+        return stats
+
+    def get_error_history(
+        self, limit: int = 100, error_type: str = None
+    ) -> List[Dict[str, Any]]:
+        """获取错误历史"""
+        history = self.error_history
+
+        # 按错误类型过滤
+        if error_type:
+            history = [entry for entry in history if entry["error_type"] == error_type]
+
+        # 返回最近的记录
+        return history[-limit:] if limit else history
+
+    def clear_error_history(self):
+        """清空错误历史"""
+        self.error_history.clear()
+        logger.info("Error history cleared")
+
+    def diagnose_recurring_errors(self) -> Dict[str, Any]:
+        """诊断重复出现的错误"""
+        from collections import Counter
+        from datetime import datetime, timedelta
+
+        if not self.error_history:
+            return {"recurring_errors": [], "recommendations": []}
+
+        # 分析最近24小时的错误
+        recent_cutoff = datetime.now() - timedelta(hours=24)
+        recent_errors = [
+            entry
+            for entry in self.error_history
+            if datetime.fromisoformat(entry["timestamp"]) > recent_cutoff
+        ]
+
+        # 统计错误频率
+        error_counter = Counter(entry["error_type"] for entry in recent_errors)
+
+        # 识别重复错误（出现3次以上）
+        recurring_errors = [
+            {
+                "error_type": error_type,
+                "count": count,
+                "frequency": count / len(recent_errors),
+            }
+            for error_type, count in error_counter.items()
+            if count >= 3
+        ]
+
+        # 生成建议
+        recommendations = []
+        for error_info in recurring_errors:
+            error_type = error_info["error_type"]
+            count = error_info["count"]
+
+            if "Network" in error_type:
+                recommendations.append(
+                    f"网络错误 {error_type} 出现 {count} 次，建议检查网络连接稳定性"
+                )
+            elif "Timeout" in error_type:
+                recommendations.append(
+                    f"超时错误 {error_type} 出现 {count} 次，建议增加超时时间或优化性能"
+                )
+            elif "Authentication" in error_type:
+                recommendations.append(
+                    f"认证错误 {error_type} 出现 {count} 次，建议检查认证配置"
+                )
+            else:
+                recommendations.append(
+                    f"错误 {error_type} 频繁出现 {count} 次，建议深入调查根本原因"
+                )
+
+        return {
+            "recurring_errors": recurring_errors,
+            "recommendations": recommendations,
+            "analysis_period": "24小时",
+            "total_recent_errors": len(recent_errors),
+        }
+
+    def execute_with_retry(
+        self, func: Callable, *args, policy_name: str = "standard", **kwargs
+    ):
+        """使用重试机制执行函数"""
+        try:
+            execution = self.retry_manager.execute_with_retry(
+                func, *args, policy=policy_name, **kwargs
+            )
+            if execution.success:
+                return execution.final_result
+            else:
+                # 记录重试失败
+                self.handle_error(
+                    execution.final_exception,
+                    {
+                        "retry_attempts": execution.attempt_count,
+                        "retry_result": execution.result.value,
+                        "total_duration": execution.total_duration,
+                    },
+                )
+                raise execution.final_exception
+        except Exception as e:
+            logger.error(f"重试执行失败: {e}")
+            raise
+
+    async def aexecute_with_retry(
+        self, func: Callable, *args, policy_name: str = "standard", **kwargs
+    ):
+        """异步使用重试机制执行函数"""
+        try:
+            execution = await self.retry_manager.aexecute_with_retry(
+                func, *args, policy=policy_name, **kwargs
+            )
+            if execution.success:
+                return execution.final_result
+            else:
+                # 记录重试失败
+                self.handle_error(
+                    execution.final_exception,
+                    {
+                        "retry_attempts": execution.attempt_count,
+                        "retry_result": execution.result.value,
+                        "total_duration": execution.total_duration,
+                    },
+                )
+                raise execution.final_exception
+        except Exception as e:
+            logger.error(f"异步重试执行失败: {e}")
+            raise
+
+    def get_retry_stats(self) -> Dict[str, Any]:
+        """获取重试统计信息"""
+        return self.retry_manager.get_stats()
+
+    def get_circuit_breaker_stats(self) -> Dict[str, Any]:
+        """获取熔断器统计信息"""
+        return self.retry_manager.circuit_breaker_registry.get_all_stats()
+
+    def reset_circuit_breaker(self, service: str):
+        """重置指定服务的熔断器"""
+        # 重置旧的熔断器实现
+        if service in self.circuit_breakers:
+            self.circuit_breakers[service] = {
+                "failure_count": 0,
+                "last_failure_time": 0,
+                "state": "closed",
+            }
+            logger.info(f"旧熔断器已重置: {service}")
+
+        # 重置新的熔断器实现
+        circuit_breaker = self.retry_manager.circuit_breaker_registry.get(service)
+        if circuit_breaker:
+            circuit_breaker.reset()
+            logger.info(f"新熔断器已重置: {service}")
+        else:
+            logger.warning(f"未找到熔断器: {service}")
+
+    def register_retry_policy(self, name: str, policy):
+        """注册重试策略"""
+        self.retry_manager.register_policy(name, policy)
+        logger.info(f"已注册重试策略: {name}")
 
 
 # 全局错误处理器实例

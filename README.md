@@ -38,7 +38,9 @@ TestAgent采用多智能体协作架构，通过协调器、规划器、研究�
 - 微服务架构设计
 - 容器化部署支持
 - 监控和日志系统
-- 错误处理和恢复机制
+- 任务创建状态监控系统
+- 智能错误处理和用户友好提醒系统
+- 网络错误诊断和自动恢复机制
 - 性能优化和缓存
 - 配置管理系统
 
@@ -150,7 +152,12 @@ chmod +x scripts/deploy.sh
    curl "http://localhost:8000/api/v1/tasks/{task_id}/status"
    ```
 
-5. **获取测试报告**
+5. **监控任务创建进度**
+   ```bash
+   curl "http://localhost:8000/api/v1/tasks/{task_id}/creation-status"
+   ```
+
+6. **获取测试报告**
    ```bash
    curl "http://localhost:8000/api/v1/tasks/{task_id}/report"
    ```
@@ -160,6 +167,9 @@ chmod +x scripts/deploy.sh
 #### 任务管理
 - `POST /api/v1/tasks/submit` - 提交测试任务
 - `GET /api/v1/tasks/{task_id}/status` - 查看任务状态
+- `GET /api/v1/tasks/{task_id}/creation-status` - 查看任务创建状态
+- `POST /api/v1/tasks/{task_id}/pause` - 暂停任务
+- `POST /api/v1/tasks/{task_id}/resume` - 恢复任务
 - `GET /api/v1/tasks/{task_id}/report` - 获取测试报告
 - `POST /api/v1/tasks/{task_id}/feedback` - 提供反馈
 
@@ -172,6 +182,7 @@ chmod +x scripts/deploy.sh
 - `GET /api/v1/monitoring/health` - 健康检查
 - `GET /api/v1/monitoring/metrics` - 系统指标
 - `GET /api/v1/config/settings` - 配置管理
+- `GET /api/v1/errors/format` - 错误消息格式化
 
 ## 🔧 配置说明
 

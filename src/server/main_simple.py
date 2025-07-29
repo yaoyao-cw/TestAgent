@@ -68,6 +68,13 @@ async def submit_task(request: Dict[str, Any]):
     }
 
 
+# 兼容性路由 - 前端可能调用的路径
+@app.post("/api/tasks")
+async def submit_task_compat(request: Dict[str, Any]):
+    """提交任务（兼容性路由）"""
+    return await submit_task(request)
+
+
 @app.get("/api/v1/tasks/{task_id}/status")
 async def get_task_status(task_id: str):
     """获取任务状态（简化版）"""
@@ -79,6 +86,12 @@ async def get_task_status(task_id: str):
         "updated_at": datetime.now().isoformat(),
         "message": "任务已完成（演示模式）",
     }
+
+
+@app.get("/api/tasks/{task_id}/status")
+async def get_task_status_compat(task_id: str):
+    """获取任务状态（兼容性路由）"""
+    return await get_task_status(task_id)
 
 
 @app.get("/api/v1/tasks")
@@ -98,6 +111,12 @@ async def list_tasks():
         "page": 1,
         "page_size": 10,
     }
+
+
+@app.get("/api/tasks")
+async def list_tasks_compat():
+    """列出任务（兼容性路由）"""
+    return await list_tasks()
 
 
 # 简化的系统API
@@ -135,6 +154,12 @@ async def get_system_status():
             "average_execution_time": 120.5,
         },
     }
+
+
+@app.get("/api/system/status")
+async def get_system_status_compat():
+    """获取系统状态（兼容性路由）"""
+    return await get_system_status()
 
 
 # 异常处理

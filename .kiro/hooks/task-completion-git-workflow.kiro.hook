@@ -4,7 +4,7 @@
   "description": "每当完成一个任务时，自动执行git功能分支工作流程，确保代码变更按照规范提交和管理",
   "version": "1.0",
   "when": {
-    "type": "taskCompleted",
+    "type": "userTriggered",
     "patterns": [
       "**/*.py",
       "**/*.ts",

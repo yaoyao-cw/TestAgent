@@ -3,7 +3,7 @@
 
 # 延迟导入以避免循环依赖
 def get_python_repl():
-    from .python_repl import PythonREPL
+    from .python_repl_final import PythonREPLTool as PythonREPL
 
     return PythonREPL
 
@@ -88,7 +88,7 @@ from .enhanced_tool_manager import (
 )
 
 # 直接导入不依赖其他模块的组件
-from .python_repl import PythonREPL
+from .python_repl_final import PythonREPLTool as PythonREPL
 
 # 工具状态机和约束解码组件
 from .state_machine import (
